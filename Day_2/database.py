@@ -3,8 +3,8 @@
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field
 from uuid import UUID
-import models
-from db import engine, SessionLocal
+import Day_2.models as models
+from Day_2.db import engine, SessionLocal
 from sqlalchemy.orm import Session
 
 app = FastAPI()
