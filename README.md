@@ -63,3 +63,24 @@ schema/schemas.py: Contains the Pydantic schemas
 routes/route.py: Contains the API routes
 
 ---
+# Day-4
+
+## FastAPI Application with PostgreSQL Database (Folder: Day_4)
+Today we would be creating a quiz game using FastAPI and PostgreSQL. This application allows creating questions with multiple choices and retrieving them via API endpoints.
+
+We need to install the following:
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn
+3. sqlalchemy: pip install sqlalchemy
+4. psycopg2-binary: pip install psycopg2-binary (for PostgreSQL connection)
+5. python-dotenv: pip install python-dotenv
+
+Ensure you have a PostgreSQL database set up and configure the POSTGRES_DATABASE_URL in a .env file.
+
+To run the application:
+uvicorn Day_4.quiz:app --reload
+
+### Files:
+database.py: Contains the database connection setup using SQLAlchemy and PostgreSQL.
+models.py: Contains the SQLAlchemy models for Questions and Choices tables.
+quiz.py: Contains the FastAPI application code with API endpoints for the quiz game.
