@@ -5,3 +5,7 @@ sqlalchemy
 # 'pymongo[srv]==3.11'
 python-dotenv
 psycopg2-binary   #This is used to connect to PostgreSQL
+
+#Day_5
+pymysql
+urllib
