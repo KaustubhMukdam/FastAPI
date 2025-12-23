@@ -84,3 +84,35 @@ uvicorn Day_4.quiz:app --reload
 database.py: Contains the database connection setup using SQLAlchemy and PostgreSQL.
 models.py: Contains the SQLAlchemy models for Questions and Choices tables.
 quiz.py: Contains the FastAPI application code with API endpoints for the quiz game.
+
+---
+# Day-5
+
+## FastAPI Application with MySQL Database (Folder: Day_5)
+Today we would be creating a blog application using FastAPI and MySQL. This application allows creating users and blog posts, retrieving them, and deleting them via API endpoints.
+
+We need to install the following libraries:
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn
+3. sqlalchemy: pip install sqlalchemy
+4. pymysql: pip install pymysql (for MySQL connection)
+5. python-dotenv: pip install python-dotenv
+
+Ensure you have a MySQL database set up and configure the environment variables (MYSQL_USERNAME, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_PORT, MYSQL_DATABASE_NAME) in a .env file.
+
+To run the application:
+uvicorn Day_5.blog:app --reload
+
+### API Endpoints:
+- GET /users/{user_id}: Retrieve a user by ID
+- GET /posts/{post_id}: Retrieve a post by ID
+- POST /users/: Create a new user
+- POST /posts/: Create a new post
+- DELETE /users/{user_id}: Delete a user by ID
+- DELETE /posts/{post_id}: Delete a post by ID
+
+### Files:
+mysqldatabase.py: Contains the MySQL database connection setup using SQLAlchemy.
+models.py: Contains the SQLAlchemy models for User and Post tables.
+blog.py: Contains the FastAPI application code with API endpoints for the blog.
+
