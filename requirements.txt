@@ -9,3 +9,5 @@ psycopg2-binary   #This is used to connect to PostgreSQL
 #Day_5
 pymysql
 urllib
+
+#Day_6
