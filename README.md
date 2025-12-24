@@ -116,3 +116,74 @@ mysqldatabase.py: Contains the MySQL database connection setup using SQLAlchemy.
 models.py: Contains the SQLAlchemy models for User and Post tables.
 blog.py: Contains the FastAPI application code with API endpoints for the blog.
 
+---
+# Day-6
+
+## Finance App - FastAPI with React and SQLite (Folder: Day_6)
+A full-stack finance application that combines FastAPI backend with React frontend, using SQLite as the database. This application allows users to track their income and expenses with transaction management.
+
+We need to install the following libraries:
+
+### Backend (FastAPI):
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. sqlalchemy: `pip install sqlalchemy`
+
+### Frontend (React):
+1. react: Built with Create React App
+2. axios: For making HTTP requests to the backend API
+
+### Database:
+SQLite - A lightweight, file-based database (finance.db)
+
+### Running the Application:
+
+**Backend (FastAPI Server):**
+```bash
+cd Day_6/FastAPI
+uvicorn main:app --reload
+```
+Backend runs on: `http://localhost:8000`
+
+**Frontend (React App):**
+```bash
+cd Day_6/React/finance-app
+npm install
+npm start
+```
+Frontend runs on: `http://localhost:3000`
+
+### API Endpoints:
+- `GET /transactions`: Retrieve all transactions with pagination support (skip, limit parameters)
+- `POST /transactions`: Create a new transaction
+
+### Transaction Object Structure:
+```json
+{
+  "amount": 100.50,
+  "category": "Food",
+  "description": "Groceries",
+  "is_income": false,
+  "date": "2024-12-24"
+}
+```
+
+### Backend Files:
+- **main.py**: Contains the FastAPI application code with API endpoints and CORS middleware configuration
+- **models.py**: Contains the SQLAlchemy model for the Transaction table
+- **database.py**: Contains the SQLite database connection setup using SQLAlchemy
+- **finance.db**: SQLite database file that stores all transaction data
+
+### Frontend Files:
+- **App.js**: Main React component that handles transaction display and form submission
+- **api.js**: Axios API client for communicating with the FastAPI backend
+- **App.css**: Styling for the application
+- **index.js**: React application entry point
+
+### Features:
+- View all financial transactions
+- Add new income/expense transactions with categories
+- Track transaction details (amount, category, description, date)
+- Real-time updates between frontend and backend
+- Responsive UI with Bootstrap styling
+- CORS enabled for frontend-backend communication
