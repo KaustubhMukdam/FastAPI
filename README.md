@@ -187,3 +187,53 @@ Frontend runs on: `http://localhost:3000`
 - Real-time updates between frontend and backend
 - Responsive UI with Bootstrap styling
 - CORS enabled for frontend-backend communication
+
+---
+# Day-7
+
+## FastAPI Application with Jinja2 Templates (Folder: Day_7)
+An introduction to server-side rendering with FastAPI using Jinja2 templating engine. This application demonstrates how to render HTML templates dynamically with data passed from the backend.
+
+We need to install the following:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. jinja2: `pip install jinja2`
+
+### Running the Application:
+```bash
+cd Day_7
+uvicorn main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### API Endpoints:
+- `GET /`: Render the home page with Formula 1 drivers data
+
+### Features:
+- **Jinja2 Templates**: Server-side rendering of HTML templates
+- **Dynamic Content**: Pass Python data to HTML templates
+- **Template Loops**: Use Jinja2 for loops to iterate through data
+- **Bootstrap Styling**: Responsive UI with Bootstrap 5
+
+### Data Structure:
+The application includes a list of Formula 1 drivers with their team information:
+```python
+F1 = [
+    {"name": "Max Verstappen", "team": "Red Bull"},
+    {"name": "Lewis Hamilton", "team": "Ferrari"},
+    {"name": "Charles Leclerc", "team": "Ferrari"},
+    {"name": "Kimi Antonelli", "team": "Mercedes"},
+    {"name": "Sergio Perez", "team": "Red Bull"}
+]
+```
+
+### Files:
+- **main.py**: Contains the FastAPI application code with Jinja2 template configuration and route to render the home page
+- **templates/home.html**: Jinja2 HTML template that displays a welcome message and a table of Formula 1 drivers with their teams
+
+### Template Syntax Used:
+- `{{ variable }}`: Display variable values in the template
+- `{% for item in list %}...{% endfor %}`: Loop through data in templates
+- `{{ item['key'] }}`: Access dictionary values in templates
+
+---
