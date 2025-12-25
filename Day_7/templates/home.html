@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>Home</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    </head>
+
+    <body>
+        <p>
+            {{ message }}
+        </p>
+
+        <table class="table">
+            <tr>
+                <th>Driver</th>
+                <th>Team</th>
+            </tr>
+            {% for driver in F1 %}
+                <tr>
+                    <td>{{ driver['name'] }}</td>
+                    <td>{{ driver['team'] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    </body>
+
+</html>

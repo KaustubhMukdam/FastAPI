@@ -11,3 +11,6 @@ pymysql
 urllib
 
 #Day_6
+
+#Day_7
+jinja2
