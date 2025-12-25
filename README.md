@@ -237,3 +237,83 @@ F1 = [
 - `{{ item['key'] }}`: Access dictionary values in templates
 
 ---
+# Day-8
+
+## Deploying FastAPI to AWS Lambda (Folder: Day_8)
+Learn how to deploy a FastAPI application to AWS Lambda using Mangum. Mangum is an ASGI adapter that allows FastAPI applications to run on AWS Lambda and other serverless platforms.
+
+We need to install the following:
+1. fastapi: `pip install fastapi`
+2. mangum: `pip install mangum`
+
+### What is Mangum?
+Mangum is an ASGI adapter for AWS Lambda that allows you to deploy FastAPI applications serverlessly. It handles the conversion between AWS Lambda events and ASGI requests.
+
+### Running Locally:
+```bash
+cd Day_8
+uvicorn main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### API Endpoints:
+- `GET /`: Returns a welcome message
+
+### Deployment to AWS Lambda:
+
+#### Step 1: Install Dependencies
+```bash
+pip3 install -t Day_8\dependencies -r requirements.txt
+```
+This installs all required dependencies into a local `dependencies` folder.
+
+#### Step 2: Create ZIP Package for Lambda
+Navigate to the Day_8 directory and compress the dependencies:
+```bash
+cd Day_8
+cd dependencies
+Compress-Archive -Path * -DestinationPath ..\lambda.zip -Force
+cd ..
+```
+
+#### Step 3: Add Main Code to ZIP
+Add the main.py file to the lambda.zip:
+```bash
+Compress-Archive -Path main.py -DestinationPath .\lambda.zip -Force
+```
+
+#### Step 4: Upload to AWS Lambda
+- Go to AWS Lambda Console
+- Create a new function
+- Upload the `lambda.zip` file
+- Set the handler to `main.handler`
+- Configure environment variables and other settings as needed
+- Deploy and test
+
+### Files:
+- **main.py**: Contains the FastAPI application with Mangum adapter. The `handler` variable is the entry point for AWS Lambda
+- **dependencies/**: Directory containing all installed Python dependencies for the Lambda environment
+- **lambda.zip**: Compressed package containing both the application code and dependencies, ready for AWS Lambda deployment
+
+### Key Components:
+```python
+from fastapi import FastAPI
+from mangum import Mangum
+
+app = FastAPI()
+handler = Mangum(app)  # This is the Lambda handler
+```
+
+### Important Notes:
+- The `handler = Mangum(app)` line creates the Lambda handler that AWS uses to process requests
+- All dependencies must be included in the ZIP file for Lambda to find them
+- The handler path in AWS Lambda should be set to `main.handler`
+- Cold start times may be higher due to Lambda's execution model
+
+### Features:
+- **Serverless Deployment**: Deploy FastAPI without managing servers
+- **Cost Efficient**: Pay only for execution time
+- **Scalable**: Automatically scales with demand
+- **ASGI Compatible**: Mangum provides full ASGI compatibility with Lambda
+
+---

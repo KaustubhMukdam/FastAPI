@@ -4,3 +4,5 @@ books.db
 .env
 finance.db
 node_modules
+dependencies
+lambda.zip
