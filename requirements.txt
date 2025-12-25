@@ -8,9 +8,12 @@ psycopg2-binary   #This is used to connect to PostgreSQL
 
 #Day_5
 pymysql
-urllib
+#urllib
 
 #Day_6
 
 #Day_7
 jinja2
+
+#Day_8
+mangum
