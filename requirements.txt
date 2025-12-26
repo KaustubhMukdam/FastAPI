@@ -17,3 +17,9 @@ jinja2
 
 #Day_8
 mangum
+
+#Day_9
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+bcrypt==4.0.1
