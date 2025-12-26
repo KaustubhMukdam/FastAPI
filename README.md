@@ -317,3 +317,58 @@ handler = Mangum(app)  # This is the Lambda handler
 - **ASGI Compatible**: Mangum provides full ASGI compatibility with Lambda
 
 ---
+# Day-9
+
+## FastAPI with JWT (JSON Web Token) Authentication (Folder: Day_9)
+
+This module demonstrates how to secure FastAPI endpoints using JWT authentication with a SQLite database for user storage. It includes user registration, password hashing, token issuance (login), and token-protected routes.
+
+You will typically need the following libraries:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. python-jose: `pip install python-jose[cryptography]` (for JWT encoding/decoding)
+4. passlib[bcrypt]: `pip install passlib[bcrypt]` (for password hashing)
+5. sqlalchemy: `pip install sqlalchemy`
+
+### Running the Application:
+```bash
+cd Day_9
+uvicorn main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### Typical API Endpoints:
+- `POST /register` : Create a new user (hashes password and stores user in SQLite)
+- `POST /login` : Authenticate user credentials and return an access JWT
+- `GET /protected` : Example protected route that requires a valid JWT in the `Authorization: Bearer <token>` header
+
+### Security Notes:
+- Use `python-jose` for secure JWT signing and verification.
+- Store a strong secret key in environment variables (do not hardcode in source).
+- Use secure password hashing (e.g., `passlib` with bcrypt).
+- Consider token expiration and refresh strategies for production systems.
+
+### Files:
+- **auth.py**: Contains authentication helpers (password hashing, token creation, dependency to verify tokens)
+- **database.py**: Database setup using SQLAlchemy and SQLite connection
+- **models.py**: SQLAlchemy models for `User` (username, hashed_password, etc.)
+- **main.py**: FastAPI application wiring routes and authentication dependencies
+
+### Example token creation (concept):
+```python
+from jose import jwt
+
+payload = {"sub": username}
+token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+```
+
+### Example protected route (concept):
+```python
+from fastapi import Depends
+
+@app.get('/protected')
+def protected_route(current_user=Depends(get_current_user)):
+  return {"message": f"Hello {current_user.username}"}
+```
+
+---
