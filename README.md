@@ -372,3 +372,32 @@ def protected_route(current_user=Depends(get_current_user)):
 ```
 
 ---
+# Day-10
+## Pydantic: A backbone of FastAPI (Folder: Day_10)
+Pydantic is a data validation and serialization library for Python that serves as the backbone of FastAPI. It provides a simple and efficient way to define data models, validate input/output, and handle data parsing.
+
+Key Features Demonstrated:
+1. **Field Validation**: Using Field constraints like min_length, max_length, gt, lt for data validation
+
+2. **Dynamic UUID**: Generating unique IDs using default_factory with uuid4
+
+3. **Populate JSON to Python Objects**: Converting Pydantic models to dictionaries using model_dump and unpacking
+
+4. **Custom Validation**: Using @field_validator decorators for custom validation logic
+
+We need to install the following libraries:
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn
+3. pydantic: pip install pydantic
+4. pydantic[email]: pip install pydantic[email] (for EmailStr)
+
+To run the application:
+uvicorn Day_10.main:app --reload
+
+### API Endpoints:
+- `POST /users/`: Create a new user with validation
+
+- `POST /users/dict/`: Create a new user using model_dump for dictionary conversion
+
+### Files:
+- **main.py**: Contains the FastAPI application code demonstrating Pydantic models, field validation, custom validators, and user creation endpoints.
