@@ -27,3 +27,7 @@ bcrypt==4.0.1
 #Day_10
 pydantic
 pydantic[email]
+
+#Day_11
+redis
+httpx

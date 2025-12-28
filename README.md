@@ -401,3 +401,38 @@ uvicorn Day_10.main:app --reload
 
 ### Files:
 - **main.py**: Contains the FastAPI application code demonstrating Pydantic models, field validation, custom validators, and user creation endpoints.
+
+---
+# Day-11
+## FastAPI with Redis (Folder: Day_11)
+
+Redis (Remote Dictionary Server) is a key-value store that provides a persistent, in-memory data structure. It is often used for caching, session management, and distributed locking. It is a NoSQL Database with default port 6379.
+
+This application demonstrates how to integrate Redis with FastAPI for caching API responses. It fetches data from an external API and caches it in Redis to improve performance on subsequent requests.
+
+We need to install the following libraries:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. redis: `pip install redis`
+4. httpx: `pip install httpx`
+5. python-dotenv: `pip install python-dotenv`
+
+### Setting up Redis:
+Users can access Redis using any of the following methods:
+
+- **Local Installation**: Install Redis on your local machine
+
+- **Docker**: Run Redis in a Docker container: docker run -d -p 6379:6379 redis
+
+- **Online Services**: Use cloud Redis services like Redis Labs, AWS ElastiCache, etc.
+
+Configure the REDIS_URL in a .env file if using a custom Redis instance.
+
+To run the application:
+uvicorn Day_11.main:app --reload
+
+### API Endpoints:
+- `GET /users`: Fetches user data from an external API and caches it in Redis for faster access.
+
+### Files:
+- **main.py**: Contains the FastAPI application code with Redis integration, caching logic, and external API calls.
