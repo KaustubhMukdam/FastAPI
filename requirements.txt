@@ -31,3 +31,6 @@ pydantic[email]
 #Day_11
 redis
 httpx
+
+#Day_12
+websockets
