@@ -436,3 +436,41 @@ uvicorn Day_11.main:app --reload
 
 ### Files:
 - **main.py**: Contains the FastAPI application code with Redis integration, caching logic, and external API calls.
+
+---
+# Day-12
+
+## Real Time Chat Room with FastAPI and WebSockets (Folder: Day_12)
+
+A simple real-time chat demo using FastAPI and WebSockets. The app serves a minimal HTML client at `/` and exposes a WebSocket endpoint at `/ws/{client_id}` to broadcast messages between connected clients.
+
+Features:
+- Embedded HTML chat UI served by the FastAPI app
+- `ConnectionManager` to track active WebSocket connections
+- Personal responses, broadcast messages, and join/leave notifications
+- Graceful handling of disconnected clients (removes closed sockets)
+
+Dependencies:
+- `fastapi`
+- `uvicorn`
+- `websockets`
+
+How to run:
+1. Open a terminal in the project root or `Day_12` folder.
+2. Run the server:
+
+```bash
+cd Day_12
+uvicorn main:app --reload
+```
+
+3. Open `http://localhost:8000` in multiple browser tabs to test real-time chat (each tab gets a unique client id).
+
+Files:
+- `main.py`: WebSocket server, `ConnectionManager`, and embedded HTML client UI.
+
+Notes:
+- If you see errors about sending on closed websockets, ensure the server has been updated to remove closed connections before broadcasting.
+- For production use, run behind a proper ASGI server, enable TLS (`wss://`) for WebSocket endpoints, and consider authentication.
+
+---
