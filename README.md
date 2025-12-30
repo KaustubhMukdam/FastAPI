@@ -502,3 +502,47 @@ The code shows both vulnerable (commented out) and secure SQL query implementati
 
 ### Files:
 main.py: Contains the FastAPI application code demonstrating user registration, sign-in, and SQL injection prevention techniques.
+
+---
+# Day-14
+
+## FastAPI with Pytest (Python Unit Testing) (Folder: Day_14)
+
+This application demonstrates how to write and run unit tests for a FastAPI application using Pytest. It includes a simple Todo application with CRUD operations and comprehensive test coverage.
+
+We need to install the following libraries:
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn
+3. pytest: pip install pytest
+4. httpx: pip install httpx (for testing async endpoints)
+
+To run the application:
+uvicorn Day_14.main:app --reload
+
+To run the tests:
+pytest Day_14/test_main.py
+
+### API Endpoints:
+- GET /: Retrieve all todos
+- GET /{todo_id}: Retrieve a specific todo by ID
+- POST /: Create a new todo
+- PUT /{todo_id}: Update an existing todo
+- DELETE /{todo_id}: Delete a todo
+
+### Todo Object Structure:
+```json
+{
+  "name": "Buy groceries",
+  "completed": false
+}
+```
+
+### Testing Features:
+- Unit tests for all CRUD operations
+- Tests for successful operations and error cases (404 for non-existent todos)
+- Use of TestClient for simulating HTTP requests
+- Async testing support with httpx
+
+### Files:
+- main.py: Contains the FastAPI application code with Todo CRUD operations
+- test_main.py: Contains comprehensive unit tests for the Todo API endpoints
