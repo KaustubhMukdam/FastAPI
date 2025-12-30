@@ -7,3 +7,4 @@ node_modules
 dependencies
 lambda.zip
 todosapp.db
+test.db
