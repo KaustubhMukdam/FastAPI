@@ -474,3 +474,31 @@ Notes:
 - For production use, run behind a proper ASGI server, enable TLS (`wss://`) for WebSocket endpoints, and consider authentication.
 
 ---
+# Day-13
+
+## SQL Injection with FastAPI (Educational Purposes Only) (Folder: Day_13)
+
+This application demonstrates the dangers of SQL injection vulnerabilities and how to prevent them using parameterized queries. It includes user registration and sign-in endpoints with SQLite database integration.
+
+**WARNING: This code is for educational purposes only. Never use vulnerable SQL queries in production applications.**
+
+We need to install the following libraries:
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn
+3. sqlalchemy: pip install sqlalchemy
+4. python-dotenv: pip install python-dotenv
+
+Configure the SQLite_Database_URL in a .env file (e.g., SQLite_Database_URL=sqlite:///./test.db).
+
+To run the application:
+uvicorn Day_13.main:app --reload
+
+### API Endpoints:
+- POST /register/: Register a new user
+- POST /signin/: Sign in with username and password
+
+### Security Demonstration:
+The code shows both vulnerable (commented out) and secure SQL query implementations. The vulnerable version concatenates user input directly into the SQL string, while the secure version uses parameterized queries to prevent SQL injection attacks.
+
+### Files:
+main.py: Contains the FastAPI application code demonstrating user registration, sign-in, and SQL injection prevention techniques.
