@@ -38,3 +38,7 @@ websockets
 #Day_14
 httpx
 pytest
+
+#Day_15
+sqlmodel
+aiosqlite
