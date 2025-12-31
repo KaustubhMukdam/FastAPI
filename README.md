@@ -546,3 +546,45 @@ pytest Day_14/test_main.py
 ### Files:
 - main.py: Contains the FastAPI application code with Todo CRUD operations
 - test_main.py: Contains comprehensive unit tests for the Todo API endpoints
+
+---
+# Day-15
+
+## FastAPI with Async Operations and Background Tasks (CQRS Architecture) (Folder: Day_15)
+
+This application demonstrates advanced FastAPI features including asynchronous database operations with SQLModel, service layer architecture, background tasks, and application lifespan management. It provides a simple item management API with create and read operations.
+
+We need to install the following libraries:
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn[standard]
+3. sqlmodel: pip install sqlmodel
+4. sqlalchemy[asyncio]: pip install sqlalchemy[asyncio]
+5. python-dotenv: pip install python-dotenv
+
+Configure the DAY_15_DATABASE_URL in a .env file (e.g., DAY_15_DATABASE_URL=sqlite+aiosqlite:///./test.db).
+
+To run the application:
+uvicorn Day_15.main:app --reload
+
+### API Endpoints:
+- GET /items/: Retrieve all items
+- GET /items/{item_id}: Retrieve a specific item by ID
+- POST /items/: Create a new item (triggers background logging task)
+
+### Item Object Structure:
+```json
+{
+  "name": "Sample Item",
+  "description": "A sample item description"
+}
+```
+
+### Features:
+- **Async Database Operations**: Uses SQLAlchemy's async engine for non-blocking database interactions
+- **Service Layer**: Separates business logic into a dedicated service class
+- **Background Tasks**: Demonstrates background task execution for logging operations after item creation
+- **Lifespan Management**: Uses FastAPI's lifespan context manager for database initialization and cleanup
+- **SQLModel Integration**: Leverages SQLModel for type-safe database models and Pydantic validation
+
+### Files:
+main.py: Contains the FastAPI application code with async database operations, service layer, and background tasks
