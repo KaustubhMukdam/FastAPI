@@ -588,3 +588,40 @@ uvicorn Day_15.main:app --reload
 
 ### Files:
 main.py: Contains the FastAPI application code with async database operations, service layer, and background tasks
+
+---
+# Day-16
+
+## FastAPI Rate Limiting with Middleware (Folder: Day_16)
+
+This application demonstrates how to implement middleware in FastAPI for request logging, rate limiting, and custom headers. It includes two examples: a simple middleware using the @app.middleware decorator and an advanced middleware class with rate limiting functionality.
+
+We need to install the following libraries:
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn
+
+To run the simple middleware example:
+uvicorn Day_16.main:app --reload
+
+To run the advanced middleware with rate limiting:
+uvicorn Day_16.rate_limiter:app --reload
+
+### API Endpoints:
+- GET /: Returns a welcome message (both examples)
+
+### Middleware Features:
+- **Request ID Logging**: Generates and logs a unique request ID for each request, adds it to response headers
+- **Rate Limiting**: Limits requests to 1 per second per IP address, returns 429 status for exceeded limits
+- **Request Logging**: Logs incoming requests with path, IP, and timestamp
+- **Processing Time Tracking**: Measures and logs request processing time
+- **Custom Headers**: Adds processing time to response headers
+
+### Middleware Types Demonstrated:
+- **Function-based Middleware**: Using @app.middleware("http") decorator
+- **Class-based Middleware**: Extending BaseHTTPMiddleware for more complex logic
+
+### Files:
+- main.py: Contains the FastAPI application with simple function-based middleware for request ID logging
+- rate_limiter.py: Contains the FastAPI application with advanced class-based middleware implementing rate limiting and detailed logging
+
+---
