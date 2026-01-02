@@ -625,3 +625,70 @@ uvicorn Day_16.rate_limiter:app --reload
 - rate_limiter.py: Contains the FastAPI application with advanced class-based middleware implementing rate limiting and detailed logging
 
 ---
+# Day-17
+
+## FastAPI with Docker Containerization (Folder: Day_17)
+
+This application demonstrates how to containerize a FastAPI application using Docker. It includes a simple user management API with SQLite database integration, background tasks, and dependency injection. The app is packaged in a Docker container for easy deployment and portability.
+
+We need to install the following libraries (included in requirements.txt):
+1. fastapi: pip install fastapi
+2. uvicorn: pip install uvicorn
+3. sqlalchemy: pip install sqlalchemy
+
+### Running Locally:
+```bash
+cd Day_17
+uvicorn app.main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### Docker Deployment:
+
+#### Build the Docker Image:
+```bash
+cd Day_17
+docker build -t fastapi-docker .
+```
+
+#### Run the Docker Container:
+```bash
+docker run -d --name fastapi-docker-container -p 80:80 fastapi-docker
+```
+The application will be accessible at `http://localhost:80`
+
+#### Stop and Remove Container (if needed):
+```bash
+docker stop fastapi-docker-container
+docker rm fastapi-docker-container
+```
+
+### API Endpoints:
+- GET /user/: Retrieve all users from the database
+- POST /user/: Create a new user (accepts 'name' parameter, triggers background logging task)
+
+### User Object Structure:
+```json
+{
+  "id": 1,
+  "name": "John Doe"
+}
+```
+
+### Features:
+- **SQLite Database**: Local database for user storage with SQLAlchemy ORM
+- **Background Tasks**: Asynchronous task execution for logging user creation
+- **Dependency Injection**: Database session management with FastAPI dependencies
+- **Docker Containerization**: Complete container setup with Python 3.11 base image
+- **Port Mapping**: Container runs on port 80, mapped to host port 80
+
+### Files:
+- **Dockerfile**: Docker configuration for building the container image
+- **requirements.txt**: Python dependencies for the application
+- **app/main.py**: FastAPI application code with user management endpoints and database models
+
+### Docker Configuration:
+- **Base Image**: Python 3.11
+- **Working Directory**: /app
+- **Exposed Port**: 80
+- **Command**: uvicorn app.main:app --host 0.0.0.0 --port 80
