@@ -10,3 +10,4 @@ todosapp.db
 test.db
 .pytest_cache
 .idea
+database.db
