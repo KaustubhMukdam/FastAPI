@@ -692,3 +692,248 @@ docker rm fastapi-docker-container
 - **Working Directory**: /app
 - **Exposed Port**: 80
 - **Command**: uvicorn app.main:app --host 0.0.0.0 --port 80
+
+---
+# Day-18
+
+## JWT Authentication for FastAPI and React (Folder: Day_18)
+
+This application demonstrates a complete full-stack authentication system using JWT (JSON Web Tokens) with FastAPI backend and React frontend. It includes user registration, login, token-based authentication, and protected routes. The backend uses SQLAlchemy for database management and bcrypt for password hashing, while the frontend uses React Router for navigation and localStorage for token management.
+
+We need to install the following libraries:
+
+### Backend (FastAPI):
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. sqlalchemy: `pip install sqlalchemy`
+4. python-jose: `pip install python-jose[cryptography]` (for JWT encoding/decoding)
+5. passlib[bcrypt]: `pip install passlib[bcrypt]` (for password hashing)
+6. python-dotenv: `pip install python-dotenv`
+7. python-multipart: `pip install python-multipart` (for form data)
+
+### Frontend (React):
+1. react: Built with Create React App
+2. react-router-dom: `npm install react-router-dom` (for routing)
+
+### Database:
+SQLite - A lightweight, file-based database (database.db)
+
+### Environment Setup:
+Create a `.env` file in the backend directory with:
+```
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+```
+
+### Running the Application:
+
+**Backend (FastAPI Server):**
+```bash
+cd Day_18/backend
+uvicorn main:app --reload
+```
+Backend runs on: `http://localhost:8000`
+
+**Frontend (React App):**
+```bash
+cd Day_18/frontend/auth-app
+npm install
+npm start
+```
+Frontend runs on: `http://localhost:3000`
+
+### API Endpoints:
+- `POST /register`: Register a new user (accepts username and password)
+- `POST /token`: Login and get access token (OAuth2 form data)
+- `GET /verify_token/{token}`: Verify if a token is valid
+
+### User Registration Object:
+```json
+{
+  "username": "johndoe",
+  "password": "securepassword"
+}
+```
+
+### Login Response:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+### Backend Files:
+- **main.py**: FastAPI application with JWT authentication, CORS middleware, user registration, login, and token verification endpoints
+- **models.py**: SQLAlchemy User model with username and hashed password fields
+- **database.py**: SQLite database connection setup using SQLAlchemy
+
+### Frontend Files:
+- **App.js**: Main React component with routing setup for Login and Protected pages
+- **Login.js**: Login form component that handles user authentication and token storage
+- **Protected.js**: Protected page component that verifies JWT token on load and redirects if invalid
+
+### Features:
+- **User Registration**: Secure user registration with password hashing using bcrypt
+- **JWT Authentication**: Token-based authentication with configurable expiration (30 minutes)
+- **Protected Routes**: Frontend routes that require valid JWT tokens
+- **Token Verification**: Backend endpoint to verify token validity
+- **CORS Support**: Cross-origin resource sharing enabled for frontend-backend communication
+- **OAuth2 Compatible**: Login endpoint follows OAuth2 password flow standards
+- **Local Storage**: Frontend stores JWT tokens in browser localStorage
+- **Automatic Redirects**: Invalid tokens automatically redirect users to login page
+
+### Security Features:
+- **Password Hashing**: Uses bcrypt for secure password storage
+- **JWT Tokens**: Stateless authentication with signed tokens
+- **Token Expiration**: Access tokens expire after 30 minutes
+- **CORS Protection**: Configured origins for secure cross-origin requests
+
+### Authentication Flow:
+1. User registers with username and password
+2. Password is hashed and stored in database
+3. User logs in with credentials
+4. Backend validates credentials and returns JWT token
+5. Frontend stores token in localStorage
+6. Protected routes verify token with backend before rendering
+7. Invalid/expired tokens redirect to login page
+
+### Notes:
+- The application uses SQLite for simplicity, but can be easily adapted to PostgreSQL, MySQL, etc.
+- JWT secret key should be kept secure and not committed to version control
+- For production, consider using HTTPS and more secure token storage mechanisms
+- Token refresh mechanism can be added for better user experience
+
+---
+# Day-19
+
+## JWT Authentication and Todo Management with FastAPI and Vue.js (Folder: Day_19)
+
+This application demonstrates a complete full-stack Todo management system with JWT authentication using FastAPI backend and Vue.js frontend. It includes user registration, login, token-based authentication, and CRUD operations for todos. The backend uses SQLAlchemy for database management and bcrypt for password hashing, while the frontend uses Vue Router for navigation and localStorage for token management.
+
+We need to install the following libraries:
+
+### Backend (FastAPI):
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. sqlalchemy: `pip install sqlalchemy`
+4. python-jose: `pip install python-jose[cryptography]` (for JWT encoding/decoding)
+5. passlib[bcrypt]: `pip install passlib[bcrypt]` (for password hashing)
+6. python-dotenv: `pip install python-dotenv`
+7. python-multipart: `pip install python-multipart` (for form data)
+
+### Frontend (Vue.js):
+1. vue: Built with Vue CLI
+2. vue-router: `npm install vue-router` (for routing)
+3. axios: `npm install axios` (for HTTP requests)
+
+### Database:
+SQLite - A lightweight, file-based database (test_19.db)
+
+### Environment Setup:
+Create a `.env` file in the fastapi directory with:
+```
+SECRET_KEY=your-secret-key-here
+ALGORITHM=HS256
+DAY_19-DATABASE_URL=sqlite:///./test_19.db
+```
+
+### Running the Application:
+
+**Backend (FastAPI Server):**
+```bash
+cd Day_19/fastapi
+uvicorn main:app --reload
+```
+Backend runs on: `http://localhost:8000`
+
+**Frontend (Vue.js App):**
+```bash
+cd Day_19/vue/vue-todo-app
+npm install
+npm run serve
+```
+Frontend runs on: `http://localhost:8080`
+
+### API Endpoints:
+- `POST /register`: Register a new user and return access token
+- `POST /token`: Login and get access token (OAuth2 form data)
+- `GET /users/me`: Get current user information (requires authentication)
+- `POST /todos/`: Create a new todo (requires authentication)
+- `DELETE /todos/{todo_id}`: Delete a todo by ID (requires authentication)
+
+### User Registration Object:
+```json
+{
+  "username": "johndoe",
+  "password": "securepassword"
+}
+```
+
+### Login Response:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+### Todo Create Object:
+```json
+{
+  "title": "Buy groceries",
+  "description": "Milk, bread, eggs"
+}
+```
+
+### Backend Files:
+- **main.py**: FastAPI application with JWT authentication, CORS middleware, user management, and todo CRUD operations
+
+### Frontend Files:
+- **App.vue**: Main Vue component with router-view setup
+- **main.js**: Vue application entry point with router configuration
+- **router/index.js**: Vue Router configuration with routes for registration, login, and todos
+- **components/UserRegister.vue**: User registration form component
+- **components/UserLogin.vue**: User login form component with token storage
+- **components/TodoList.vue**: Todo management component with create and delete functionality
+- **assets/custom.css**: Custom styling for the application
+
+### Features:
+- **User Registration**: Secure user registration with password hashing using bcrypt
+- **JWT Authentication**: Token-based authentication with configurable expiration (60 minutes)
+- **Protected Routes**: Frontend routes that require valid JWT tokens
+- **Todo Management**: Full CRUD operations for todos (Create, Read, Delete)
+- **CORS Support**: Cross-origin resource sharing enabled for frontend-backend communication
+- **OAuth2 Compatible**: Login endpoint follows OAuth2 password flow standards
+- **Local Storage**: Frontend stores JWT tokens in browser localStorage
+- **Vue Router**: Client-side routing for different application views
+
+### Security Features:
+- **Password Hashing**: Uses bcrypt for secure password storage
+- **JWT Tokens**: Stateless authentication with signed tokens
+- **Token Expiration**: Access tokens expire after 60 minutes
+- **CORS Protection**: Configured origins for secure cross-origin requests
+
+### Authentication Flow:
+1. User registers with username and password
+2. Password is hashed and stored in database
+3. User logs in with credentials
+4. Backend validates credentials and returns JWT token
+5. Frontend stores token in localStorage
+6. Protected routes include token in Authorization header
+7. Invalid/expired tokens prevent access to protected resources
+
+### Todo Management Flow:
+1. Authenticated user creates new todos
+2. Todos are stored in database with user ownership
+3. User can view their todos
+4. User can delete their todos
+5. All operations require valid JWT authentication
+
+### Notes:
+- The application uses SQLite for simplicity, but can be easily adapted to PostgreSQL, MySQL, etc.
+- JWT secret key should be kept secure and not committed to version control
+- For production, consider using HTTPS and more secure token storage mechanisms
+- Token refresh mechanism can be added for better user experience
+- The frontend uses Vue 2 with Vue Router for navigation
+
