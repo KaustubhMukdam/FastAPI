@@ -11,3 +11,4 @@ test.db
 .pytest_cache
 .idea
 database.db
+.vercel
