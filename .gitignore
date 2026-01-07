@@ -12,3 +12,4 @@ test.db
 .idea
 database.db
 .vercel
+db.sqlite3
