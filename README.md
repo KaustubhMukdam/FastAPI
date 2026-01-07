@@ -937,3 +937,7 @@ Frontend runs on: `http://localhost:8080`
 - Token refresh mechanism can be added for better user experience
 - The frontend uses Vue 2 with Vue Router for navigation
 
+---
+# Day-20
+
+## 

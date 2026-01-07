@@ -42,3 +42,6 @@ pytest
 #Day_15
 sqlmodel
 aiosqliteA
+
+#Day_20
+fastapi[standard]
