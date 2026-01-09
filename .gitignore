@@ -13,3 +13,4 @@ test.db
 database.db
 .vercel
 db.sqlite3
+orm.db
