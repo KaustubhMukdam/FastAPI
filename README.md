@@ -940,4 +940,206 @@ Frontend runs on: `http://localhost:8080`
 ---
 # Day-20
 
-## 
+## Fitness Tracker with FastAPI and Next.js (Folder: Day_20)
+
+This application demonstrates a complete full-stack fitness tracking system with JWT authentication using FastAPI backend and Next.js frontend. It includes user registration, login, token-based authentication, and CRUD operations for workouts and routines. The backend uses SQLAlchemy for database management and bcrypt for password hashing, while the frontend uses Next.js with React components for navigation and localStorage for token management.
+
+We need to install the following libraries:
+
+### Backend (FastAPI):
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. sqlalchemy: `pip install sqlalchemy`
+4. python-jose: `pip install python-jose[cryptography]` (for JWT encoding/decoding)
+5. passlib[bcrypt]: `pip install passlib[bcrypt]` (for password hashing)
+6. python-dotenv: `pip install python-dotenv`
+7. python-multipart: `pip install python-multipart` (for form data)
+
+### Frontend (Next.js):
+1. next: Built with Next.js
+2. react: React components
+3. axios: `npm install axios` (for HTTP requests)
+
+### Database:
+SQLite - A lightweight, file-based database (fitness.db)
+
+### Environment Setup:
+Create a `.env` file in the fastapi directory with:
+```
+DAY_20_AUTH_SECRET_KEY=your-secret-key-here
+DAY_20_AUTH_ALGORITHM=HS256
+```
+
+### Running the Application:
+
+**Backend (FastAPI Server):**
+```bash
+cd Day_20/fastapi
+uvicorn api.main:app --reload
+```
+Backend runs on: `http://localhost:8000`
+
+**Frontend (Next.js App):**
+```bash
+cd Day_20/nextjs
+npm install
+npm run dev
+```
+Frontend runs on: `http://localhost:3000`
+
+### API Endpoints:
+- `POST /auth/register`: Register a new user and return access token
+- `POST /auth/token`: Login and get access token (OAuth2 form data)
+- `GET /workouts`: Get all workouts for the authenticated user
+- `GET /workouts/{workout_id}`: Get a specific workout by ID
+- `POST /workouts`: Create a new workout (requires authentication)
+- `DELETE /workouts/{workout_id}`: Delete a workout by ID (requires authentication)
+- `GET /routines`: Get all routines for the authenticated user
+- `POST /routines`: Create a new routine with selected workouts (requires authentication)
+
+### User Registration Object:
+```json
+{
+  "username": "johndoe",
+  "password": "securepassword"
+}
+```
+
+### Login Response:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer"
+}
+```
+
+### Workout Create Object:
+```json
+{
+  "name": "Push-ups",
+  "description": "Upper body strength exercise"
+}
+```
+
+### Routine Create Object:
+```json
+{
+  "name": "Morning Workout",
+  "description": "Daily routine for fitness",
+  "workouts": [1, 2, 3]
+}
+```
+
+### Backend Files:
+- **api/main.py**: FastAPI application with JWT authentication, CORS middleware, user management, and workout/routine CRUD operations
+- **api/models.py**: SQLAlchemy models for User, Workout, and Routine tables with relationships
+- **api/database.py**: SQLite database connection setup using SQLAlchemy
+- **api/deps.py**: Authentication dependencies including JWT token validation and database session management
+- **api/routers/auth.py**: Authentication router with registration and login endpoints
+- **api/routers/workouts.py**: Workouts router with CRUD operations
+- **api/routers/routines.py**: Routines router with CRUD operations
+
+### Frontend Files:
+- **src/app/page.js**: Main Next.js page with workout and routine management using React hooks
+- **src/app/login/page.js**: Login page component for user authentication
+- **src/app/components/ProtectedRoute.js**: Protected route component that verifies JWT tokens
+- **src/app/context/AuthContext.js**: React context for managing authentication state
+- **src/app/layout.js**: Root layout component with global styles
+- **src/app/globals.css**: Global CSS styles for the application
+
+### Features:
+- **User Registration**: Secure user registration with password hashing using bcrypt
+- **JWT Authentication**: Token-based authentication with configurable expiration
+- **Protected Routes**: Frontend routes that require valid JWT tokens
+- **Workout Management**: Full CRUD operations for workouts (Create, Read, Update, Delete)
+- **Routine Management**: Create routines by selecting multiple workouts
+- **CORS Support**: Cross-origin resource sharing enabled for frontend-backend communication
+- **OAuth2 Compatible**: Login endpoint follows OAuth2 password flow standards
+- **Local Storage**: Frontend stores JWT tokens in browser localStorage
+- **Next.js Routing**: Client-side routing for different application views
+
+### Security Features:
+- **Password Hashing**: Uses bcrypt for secure password storage
+- **JWT Tokens**: Stateless authentication with signed tokens
+- **Token Expiration**: Access tokens expire after authentication
+- **CORS Protection**: Configured origins for secure cross-origin requests
+
+### Authentication Flow:
+1. User registers with username and password
+2. Password is hashed and stored in database
+3. User logs in with credentials
+4. Backend validates credentials and returns JWT token
+5. Frontend stores token in localStorage
+6. Protected routes include token in Authorization header
+7. Invalid/expired tokens prevent access to protected resources
+
+### Workout and Routine Management Flow:
+1. Authenticated user creates workouts with name and description
+2. Workouts are stored in database with user ownership
+3. User can view all their workouts
+4. User can create routines by selecting multiple workouts
+5. Routines display associated workouts
+6. All operations require valid JWT authentication
+
+### Notes:
+- The application uses SQLite for simplicity, but can be easily adapted to PostgreSQL, MySQL, etc.
+- JWT secret key should be kept secure and not committed to version control
+- For production, consider using HTTPS and more secure token storage mechanisms
+- Token refresh mechanism can be added for better user experience
+- The frontend uses Next.js 13 with App Router for modern React development
+
+---
+# Day-21
+
+## SQLModel: Modern ORM for FastAPI (Folder: Day_21)
+
+This application demonstrates SQLModel, a modern ORM that combines the power of SQLAlchemy and Pydantic. SQLModel provides type-safe database models with automatic data validation, making it perfect for FastAPI applications. It supports relationships, CRUD operations, and seamless integration with FastAPI's dependency injection system.
+
+We need to install the following libraries:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. sqlmodel: `pip install sqlmodel`
+
+### Database:
+SQLite - A lightweight, file-based database (orm.db)
+
+To run the application:
+```bash
+cd Day_21
+python main.py
+```
+
+### Features Demonstrated:
+- **SQLModel Tables**: Defining database models with automatic table creation
+- **Relationships**: One-to-many relationships between Author and Book models
+- **CRUD Operations**: Create, Read, Update, Delete operations using SQLModel sessions
+- **Joins**: Performing joins to fetch related data
+- **Type Safety**: Full type hints and Pydantic validation
+
+### Models:
+- **Author**: Represents book authors with id, name, and email fields
+- **Book**: Represents books with id, title, content, and foreign key to author
+
+### Operations Demonstrated:
+1. **Create**: Adding authors and books to the database
+2. **Read**: Querying books and authors with various filters
+3. **Update**: Modifying existing book records
+4. **Delete**: Removing books from the database
+5. **Joins**: Fetching books with their associated authors
+
+### Files:
+- **main.py**: Contains the SQLModel application code demonstrating ORM operations, model definitions, and database interactions.
+
+### Key Concepts:
+- **SQLModel Metadata**: Using `SQLModel.metadata.create_all()` for table creation
+- **Session Management**: Using `Session` context manager for database operations
+- **Query Building**: Using `select()` statements with filters and joins
+- **Relationship Navigation**: Accessing related objects through relationship attributes
+
+### Notes:
+- SQLModel provides a clean, type-safe way to work with databases in Python
+- It automatically generates Pydantic models from SQLAlchemy models
+- Perfect for FastAPI applications requiring database integration
+- Supports all major databases through SQLAlchemy
+
+---

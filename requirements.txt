@@ -45,3 +45,6 @@ aiosqliteA
 
 #Day_20
 fastapi[standard]
+
+#Day_22
+sqlmodel
