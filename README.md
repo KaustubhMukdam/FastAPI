@@ -1143,3 +1143,75 @@ python main.py
 - Supports all major databases through SQLAlchemy
 
 ---
+# Day-22
+
+## Dependency Injection in FastAPI (Folder: Day_22)
+
+This application demonstrates the powerful dependency injection system in FastAPI, showcasing how to create reusable service classes and inject them into your API endpoints. Dependency injection promotes clean architecture, testability, and separation of concerns by allowing services to be easily swapped or mocked.
+
+We need to install the following libraries:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+
+To run the application:
+```bash
+cd Day_22
+uvicorn main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### Features Demonstrated:
+- **Service Classes**: Creating reusable service classes (AuthService, EmailService, Logger)
+- **Dependency Injection**: Using FastAPI's `Depends` to inject services into endpoints
+- **Annotated Dependencies**: Using `typing.Annotated` for cleaner dependency declarations
+- **Authentication Service**: Token-based authentication with service injection
+- **Logging Service**: Centralized logging functionality
+- **Email Service**: Mock email sending service for notifications
+
+### Services Demonstrated:
+- **AuthService**: Handles token authentication and raises HTTP exceptions for invalid tokens
+- **EmailService**: Simulates email sending (prints to console for demonstration)
+- **Logger**: Provides centralized logging functionality for application events
+
+### API Endpoints:
+- `GET /log/{message}`: Logs a message using the injected Logger service and returns the message
+- `GET /secure-data/?token={token}`: Returns secure data only if a valid token is provided (uses AuthService)
+
+### Endpoint Examples:
+```bash
+# Log a message
+GET /log/Hello%20World
+
+# Access secure data with valid token
+GET /secure-data/?token=valid-token
+
+# Access secure data with invalid token (returns 401)
+GET /secure-data/?token=invalid-token
+```
+
+### Files:
+- **main.py**: Contains the main FastAPI application with Logger service and logging endpoint
+- **auth_service.py**: Contains the AuthService class and secure data endpoint with authentication
+- **email.py**: Contains the EmailService class for email functionality (demonstration purposes)
+
+### Key Concepts:
+- **Depends Function**: Using `Depends(get_service)` to inject service instances
+- **Annotated Dependencies**: Cleaner syntax with `Annotated[ServiceType, Depends(get_service)]`
+- **Service Layer Pattern**: Separating business logic into dedicated service classes
+- **HTTP Exceptions**: Raising appropriate HTTP status codes from service methods
+- **Singleton Services**: Services created once per request by default
+
+### Dependency Injection Benefits:
+- **Testability**: Easy to mock services for unit testing
+- **Modularity**: Services can be developed and tested independently
+- **Reusability**: Same service can be injected into multiple endpoints
+- **Clean Architecture**: Separation of concerns between routing and business logic
+
+### Notes:
+- FastAPI's dependency injection is powerful and flexible
+- Services are instantiated per request by default
+- Use `Annotated` for cleaner, more readable dependency declarations
+- Services can have their own dependencies, creating a dependency graph
+- Perfect for implementing service layer architecture in FastAPI applications
+
+---
