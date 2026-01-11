@@ -48,3 +48,6 @@ fastapi[standard]
 
 #Day_22
 sqlmodel
+
+#Day_23
+strawberry-graphql

@@ -1215,3 +1215,123 @@ GET /secure-data/?token=invalid-token
 - Perfect for implementing service layer architecture in FastAPI applications
 
 ---
+# Day-23
+
+## GraphQL API with FastAPI and Strawberry (Folder: Day_23)
+
+This application demonstrates how to build a GraphQL API using FastAPI and Strawberry. GraphQL provides a flexible query language for APIs, allowing clients to request exactly the data they need. The application includes user and post management with relationships, showcasing GraphQL queries and mutations with SQLModel for database operations.
+
+We need to install the following libraries:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. strawberry-graphql: `pip install strawberry-graphql[fastapi]`
+4. sqlmodel: `pip install sqlmodel`
+5. python-dotenv: `pip install python-dotenv`
+
+Configure the DAY_23_DATABASE_URL in a .env file (e.g., DAY_23_DATABASE_URL=sqlite:///./test_23.db).
+
+To run the application:
+```bash
+cd Day_23
+uvicorn main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+GraphQL playground is available at: `http://localhost:8000/graphql`
+
+### Features Demonstrated:
+- **GraphQL Schema**: Defining types, queries, and mutations with Strawberry
+- **SQLModel Integration**: Using SQLModel for database models with relationships
+- **GraphQL Queries**: Fetching users and posts with flexible data selection
+- **GraphQL Mutations**: Creating new users and posts
+- **FastAPI Integration**: Combining GraphQL with FastAPI's features
+- **Database Relationships**: One-to-many relationships between users and posts
+
+### GraphQL Schema:
+- **UserType**: Represents users with id, name, email, and associated posts
+- **PostType**: Represents posts with id, title, and content
+- **Query**: get_user(id) and get_post(id) operations
+- **Mutation**: create_user(name, email) and create_post(title, content, author_id) operations
+
+### GraphQL Queries Examples:
+
+**Get a user with their posts:**
+```graphql
+query {
+  getUser(id: 1) {
+    id
+    name
+    email
+    posts {
+      id
+      title
+      content
+    }
+  }
+}
+```
+
+**Get a specific post:**
+```graphql
+query {
+  getPost(id: 1) {
+    id
+    title
+    content
+  }
+}
+```
+
+### GraphQL Mutations Examples:
+
+**Create a new user:**
+```graphql
+mutation {
+  createUser(name: "John Doe", email: "john@example.com") {
+    id
+    name
+    email
+  }
+}
+```
+
+**Create a new post:**
+```graphql
+mutation {
+  createPost(title: "My First Post", content: "This is the content", authorId: 1) {
+    id
+    title
+    content
+  }
+}
+```
+
+### Database Models:
+- **User**: id, name, email, posts (relationship)
+- **Post**: id, title, content, author_id (foreign key)
+
+### Files:
+- **main.py**: Contains the FastAPI application with GraphQL schema, SQLModel models, and GraphQL router integration
+
+### Key Concepts:
+- **Strawberry Types**: Using @strawberry.type for GraphQL type definitions
+- **GraphQL Fields**: Using @strawberry.field for query and mutation definitions
+- **Schema Creation**: Combining queries and mutations into a GraphQL schema
+- **FastAPI Router**: Integrating GraphQL with FastAPI using GraphQLRouter
+- **SQLModel Sessions**: Using database sessions for data operations
+
+### GraphQL Benefits:
+- **Flexible Queries**: Clients can request exactly the data they need
+- **Single Endpoint**: All operations go through one GraphQL endpoint
+- **Type Safety**: Strongly typed schema prevents invalid queries
+- **Introspection**: Built-in schema exploration capabilities
+- **Real-time Updates**: Can be extended with subscriptions for real-time data
+
+### Notes:
+- GraphQL provides more flexibility than REST APIs for complex data requirements
+- Strawberry offers excellent FastAPI integration with type hints
+- The GraphQL playground provides an interactive way to test queries and mutations
+- SQLModel provides seamless integration with GraphQL resolvers
+- Perfect for applications requiring complex, nested data relationships
+
+---
