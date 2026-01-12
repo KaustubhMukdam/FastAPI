@@ -1335,3 +1335,114 @@ mutation {
 - Perfect for applications requiring complex, nested data relationships
 
 ---
+# Day-24
+
+## Poetry: Dependency Management for FastAPI (Folder: Day_24)
+
+This application demonstrates how to use Poetry for dependency management in a FastAPI project. Poetry is a modern Python dependency management tool that simplifies package installation, version management, and project configuration. It uses a single `pyproject.toml` file to manage all dependencies and project metadata, making workflows cleaner and more predictable.
+
+Poetry helps avoid version conflicts within dependencies, unlike traditional `requirements.txt` files, and removes manual work from dependency management in Python projects.
+
+### Key Features of Poetry:
+- **Single Configuration File**: Uses `pyproject.toml` for all project configuration
+- **Dependency Resolution**: Automatically resolves and manages package versions
+- **Virtual Environment Management**: Creates and manages isolated environments
+- **Build System**: Handles package building and distribution
+- **Lock File**: `poetry.lock` ensures reproducible installations
+
+### Installation:
+```bash
+pip install poetry
+```
+
+### Commands Used Today:
+
+**Create a new Poetry project:**
+```bash
+poetry new fastapi-demo
+cd fastapi-demo
+```
+
+**Add dependencies:**
+```bash
+poetry add fastapi uvicorn
+```
+This automatically installs FastAPI and Uvicorn, adds them to `pyproject.toml`, and updates `poetry.lock`.
+
+**Install dependencies:**
+```bash
+poetry install
+```
+Installs all dependencies listed in `pyproject.toml` and `poetry.lock`.
+
+**Run the application:**
+```bash
+poetry run uvicorn src.fastapi_demo.main:app --reload
+```
+Runs the FastAPI application using Poetry's virtual environment.
+
+**Update dependencies:**
+```bash
+poetry update
+```
+Updates all dependencies to their latest compatible versions.
+
+**Build for distribution:**
+```bash
+poetry build
+```
+Creates distribution packages in the `/dist` folder for production deployment.
+
+### Project Structure:
+The Poetry project follows a standard structure:
+```
+fastapi-demo/
+├── pyproject.toml          # Project configuration and dependencies
+├── poetry.lock             # Lock file for reproducible installs
+├── README.md               # Project documentation
+├── src/
+│   └── fastapi_demo/       # Source code package
+│       ├── __init__.py
+│       └── main.py         # FastAPI application
+└── tests/                  # Test directory
+    └── __init__.py
+```
+
+### Running the Application:
+```bash
+cd Day_24/fastapi-demo
+poetry run uvicorn src.fastapi_demo.main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### API Endpoints:
+- `GET /`: Returns a welcome message with "Hello World"
+
+### Files:
+- **pyproject.toml**: Poetry configuration file with project metadata and dependencies
+- **poetry.lock**: Lock file ensuring consistent dependency versions
+- **src/fastapi_demo/main.py**: Simple FastAPI application with a root endpoint
+- **README.md**: Project documentation
+
+### Key Concepts:
+- **pyproject.toml**: Modern Python project configuration standard (PEP 621)
+- **Poetry Lock File**: Ensures all environments have identical dependency versions
+- **Source Layout**: Uses `src/` layout for better package structure
+- **Virtual Environments**: Poetry automatically manages isolated environments
+- **Dependency Groups**: Can define different dependency sets for development, testing, etc.
+
+### Poetry Benefits:
+- **Reproducible Builds**: Lock file ensures consistent environments
+- **Version Resolution**: Automatically handles dependency conflicts
+- **Clean Workflow**: Single tool for all dependency management tasks
+- **Modern Standards**: Uses current Python packaging standards
+- **IDE Integration**: Works well with modern Python development tools
+
+### Notes:
+- Poetry creates virtual environments automatically in a `.venv` folder
+- The `src/` layout prevents import issues during development
+- `poetry.lock` should be committed to version control for reproducible builds
+- Poetry integrates well with CI/CD pipelines and containerization
+- Perfect for professional Python projects requiring reliable dependency management
+
+---

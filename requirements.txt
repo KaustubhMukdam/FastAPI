@@ -51,3 +51,6 @@ sqlmodel
 
 #Day_23
 strawberry-graphql
+
+#Day_24
+poetry
