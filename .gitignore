@@ -14,3 +14,5 @@ database.db
 .vercel
 db.sqlite3
 orm.db
+dist
+pyproject.toml
