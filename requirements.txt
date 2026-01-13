@@ -54,3 +54,6 @@ strawberry-graphql
 
 #Day_24
 poetry
+
+#Day_25
+opentelemetry-distro
