@@ -1446,3 +1446,27 @@ Application runs on: `http://localhost:8000`
 - Perfect for professional Python projects requiring reliable dependency management
 
 ---
+# Day-25
+
+## OpenTelemetry with FastAPI (Folder: Day_25)
+
+This application demonstrates OpenTelemetry integration with FastAPI for distributed tracing, metrics, and logging. OpenTelemetry is an open-source framework for tracking telemetry data to monitor application performance and identify failures in real-time.
+
+We need to install the following libraries:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. opentelemetry-distro: `pip install opentelemetry-distro`
+4. opentelemetry-instrumentation-fastapi: `pip install opentelemetry-instrumentation-fastapi`
+
+To run the application:
+```bash
+cd Day_25
+opentelemetry-instrument --traces_exporter console --metrics_exporter console --logs_exporter console --service_name dice_server uvicorn main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### API Endpoints:
+- `GET /rolldice`: Rolls 15 dice, distributes them into 3 lists of 5 each, and returns the results with OpenTelemetry tracing.
+
+### Files:
+- **main.py**: Contains the FastAPI application code with OpenTelemetry tracing for dice rolling.

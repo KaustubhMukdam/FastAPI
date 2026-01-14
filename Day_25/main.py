@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from random import randint
 import copy
+from opentelemetry import trace
+
+tracer = trace.get_tracer("diceroller.tracer")
 
 app = FastAPI()
 
@@ -36,4 +39,7 @@ async def roll_dice():
     return {"dice_rolls": result}
 
 def roll():
-    return randint(1, 6)
+    with tracer.start_as_current_span("roll") as rollspan:
+        result = randint(1, 6)
+        rollspan.set_attribute("roll.value", result)
+        return result
