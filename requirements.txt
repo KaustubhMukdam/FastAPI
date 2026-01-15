@@ -57,3 +57,11 @@ poetry
 
 #Day_25
 opentelemetry-distro
+
+#Day_26
+supabase
+jinja2
+python-multipart
+email-validator
+python-dotenv
+pyjwt
