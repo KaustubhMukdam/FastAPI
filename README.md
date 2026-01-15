@@ -1470,3 +1470,225 @@ Application runs on: `http://localhost:8000`
 
 ### Files:
 - **main.py**: Contains the FastAPI application code with OpenTelemetry tracing for dice rolling.
+
+---
+# Day-26
+
+## Employee Management System with Supabase (Folder: Day_26)
+
+This application demonstrates how to build a full-stack employee management system using FastAPI with Supabase as the backend. Supabase provides PostgreSQL database, authentication, and file storage capabilities. The application includes user authentication with JWT tokens, CRUD operations for employee management, and image upload functionality with a beautiful web interface.
+
+We need to install the following libraries:
+1. fastapi: `pip install fastapi`
+2. uvicorn: `pip install uvicorn`
+3. supabase: `pip install supabase`
+4. python-dotenv: `pip install python-dotenv`
+5. pydantic[email]: `pip install pydantic[email]`
+6. python-multipart: `pip install python-multipart`
+7. pyjwt: `pip install pyjwt`
+
+Configure the following environment variables in a .env file:
+```env
+DAY_26_SUPABASE_URL=your_supabase_project_url
+DAY_26_SUPABASE_KEY=your_supabase_anon_key
+DAY_26_SUPABASE_BUCKET=demo-bucket
+DAY_26_SUPABASE_JWT_SECRET=your_jwt_secret
+```
+
+### Supabase Setup:
+
+**1. Create the employees table:**
+```sql
+create table employees (
+  id serial primary key,
+  first_name text not null,
+  last_name text not null,
+  email text unique not null,
+  salary numeric not null,
+  image_url text,
+  is_active boolean default true
+);
+```
+
+**2. Configure Row Level Security (RLS):**
+- Option A: Disable RLS on the employees table (easiest for development)
+- Option B: Add RLS policy:
+```sql
+CREATE POLICY "Enable all access for employees"
+ON employees
+FOR ALL
+TO public
+USING (true)
+WITH CHECK (true);
+```
+
+**3. Configure Storage Bucket:**
+- Create a bucket named `demo-bucket`
+- Set bucket to Public
+- Add storage policy:
+```sql
+CREATE POLICY "Public Access"
+ON storage.objects
+FOR ALL
+TO public
+USING (bucket_id = 'demo-bucket')
+WITH CHECK (bucket_id = 'demo-bucket');
+```
+
+To run the application:
+```bash
+cd Day_26
+uvicorn employee_repo.main:app --reload
+```
+Application runs on: `http://localhost:8000`
+
+### Features Demonstrated:
+- **User Authentication**: Sign up, login, and logout with JWT tokens
+- **Employee CRUD**: Create, read, update, and delete employee records
+- **Image Upload**: Upload and store employee profile images in Supabase Storage
+- **Soft Delete**: Mark employees as inactive instead of permanent deletion
+- **Form Validation**: Pydantic models with email validation and salary constraints
+- **Responsive UI**: Modern, gradient-themed web interface with proper styling
+- **Session Management**: Cookie-based authentication with httponly cookies
+
+### API Endpoints:
+
+**Authentication Routes:**
+- `GET /signup`: Display signup form
+- `POST /signup`: Create new user account
+- `GET /login`: Display login form
+- `POST /login`: Authenticate user and create session
+- `GET /logout`: Clear session and logout user
+
+**Employee Management Routes:**
+- `GET /`: List all active employees
+- `GET /add`: Display add employee form
+- `POST /add`: Create new employee with optional image
+- `GET /edit/{employee_id}`: Display edit employee form
+- `POST /edit/{employee_id}`: Update employee details
+- `POST /delete/{employee_id}`: Soft delete employee (mark as inactive)
+
+### Project Structure:
+```
+Day_26/
+├── employee_repo/
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── employee_routes.py    # Employee CRUD operations
+│   │   └── auth_routes.py        # Authentication endpoints
+│   ├── static/
+│   │   └── style.css             # Application styling
+│   ├── templates/
+│   │   ├── index.html            # Employee list dashboard
+│   │   ├── add_employee.html     # Add employee form
+│   │   ├── edit_employee.html    # Edit employee form
+│   │   ├── login.html            # Login page
+│   │   └── signup.html           # Registration page
+│   ├── __init__.py
+│   ├── main.py                   # FastAPI application entry point
+│   ├── database.py               # Supabase client configuration
+│   ├── models.py                 # Pydantic models
+│   ├── forms.py                  # Form handling decorator
+│   └── auth.py                   # Authentication middleware
+├── .env                          # Environment variables
+└── requirements.txt              # Project dependencies
+```
+
+### Database Models:
+- **Employee**: 
+  - id (serial primary key)
+  - first_name (text, required)
+  - last_name (text, required)
+  - email (text, unique, required)
+  - salary (numeric, required, must be positive)
+  - image_url (text, optional)
+  - is_active (boolean, default true)
+
+### Pydantic Models:
+- **EmployeeBase**: Base model with first_name, last_name, email, and salary validation
+- **EmployeeCreate**: Model for creating new employees
+- **EmployeeUpdate**: Model for updating employees with is_active status field
+
+### Key Concepts:
+- **Supabase Client**: Using create_client for database and storage operations
+- **JWT Authentication**: Token-based authentication with cookie storage
+- **Form Data Handling**: Custom @as_form decorator for Pydantic models
+- **File Upload**: Handling multipart form data with unique filename generation
+- **Template Rendering**: Using Jinja2Templates for dynamic HTML pages
+- **Static Files**: Serving CSS and other static assets
+- **Environment Variables**: Secure configuration management with python-dotenv
+
+### Supabase Features Used:
+- **PostgreSQL Database**: Reliable relational database with SQL queries
+- **Supabase Auth**: Built-in authentication with email/password
+- **Supabase Storage**: File storage with public bucket access
+- **Row Level Security**: Fine-grained access control policies
+- **Real-time Capabilities**: Foundation for real-time updates (extendable)
+
+### Security Features:
+- **JWT Tokens**: Secure session management
+- **HttpOnly Cookies**: Protection against XSS attacks
+- **Password Hashing**: Handled by Supabase Auth
+- **Email Validation**: Pydantic EmailStr validation
+- **Input Sanitization**: Form validation with Pydantic models
+- **Secure File Upload**: Unique filename generation to prevent conflicts
+
+### UI Features:
+- **Modern Design**: Purple gradient theme with clean aesthetics
+- **Responsive Layout**: Works on desktop, tablet, and mobile devices
+- **Interactive Tables**: Hover effects and action buttons
+- **Form Validation**: Client-side and server-side validation
+- **Status Indicators**: Visual Active/Inactive badges
+- **Image Display**: Profile image thumbnails with fallback
+- **Empty States**: Helpful messages when no data exists
+
+### Image Upload Process:
+1. Generate unique filename with timestamp and UUID
+2. Read file content from multipart form data
+3. Upload to Supabase Storage bucket
+4. Store public URL in employee database record
+5. Display image in employee list and edit forms
+
+### Files:
+- **main.py**: FastAPI application setup with route registration
+- **database.py**: Supabase client initialization and configuration
+- **models.py**: Pydantic models with validation for employees
+- **forms.py**: Decorator for handling form data with Pydantic
+- **auth.py**: Authentication middleware and JWT verification
+- **employee_routes.py**: Employee CRUD endpoints with image handling
+- **auth_routes.py**: User authentication endpoints (signup/login/logout)
+- **style.css**: Complete styling for all pages and components
+- **HTML templates**: Jinja2 templates for all pages
+
+### Notes:
+- Supabase provides a free tier perfect for development and small projects
+- Images are stored with unique filenames to prevent overwriting
+- Soft delete preserves data while hiding inactive employees
+- JWT tokens are stored in httponly cookies for security
+- The application uses PostgreSQL through Supabase's API
+- Row Level Security policies can be customized for production use
+- Form validation ensures data integrity at multiple levels
+- The UI is fully responsive and works across all devices
+- Perfect for learning full-stack development with modern tools
+
+### Supabase Benefits:
+- **Backend as a Service**: No server management required
+- **PostgreSQL Database**: Powerful relational database with SQL
+- **Built-in Auth**: User management and authentication included
+- **File Storage**: S3-compatible object storage
+- **Real-time**: WebSocket support for live updates
+- **Auto-generated APIs**: REST and GraphQL APIs out of the box
+- **Row Level Security**: Database-level access control
+- **Dashboard**: Web interface for database and storage management
+
+### Production Considerations:
+- Enable and configure proper RLS policies for security
+- Use service_role key for admin operations only
+- Implement proper error handling and logging
+- Add rate limiting for API endpoints
+- Configure CORS properly for production domains
+- Use environment-specific configuration
+- Implement proper session timeout and refresh
+- Add comprehensive input validation
+- Configure backup and recovery strategies
+- Monitor usage and performance metrics
