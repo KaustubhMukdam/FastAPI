@@ -1692,3 +1692,106 @@ Day_26/
 - Add comprehensive input validation
 - Configure backup and recovery strategies
 - Monitor usage and performance metrics
+
+---
+# Day-27
+
+## UV Python with FastAPI (Folder: Day_27)
+
+This application demonstrates UV Python, a fast and modern Python package manager and project manager. UV is designed to be a drop-in replacement for pip and virtualenv, offering significantly faster performance and better dependency resolution. It automatically creates virtual environments and manages dependencies through a pyproject.toml file.
+
+### Key Features of UV:
+- **Fast Installation**: Significantly faster than pip for installing packages
+- **Automatic Virtual Environments**: Creates and manages virtual environments automatically
+- **Modern Standards**: Uses pyproject.toml for project configuration
+- **Dependency Resolution**: Advanced dependency resolution to avoid conflicts
+- **Drop-in Replacement**: Compatible with existing Python workflows
+
+### Installation:
+```bash
+pip install uv
+```
+
+### Commands Used Today:
+
+**Check Python versions:**
+```bash
+uv python list
+```
+
+**Install latest Python (if needed):**
+```bash
+uv python install
+```
+
+**Initialize a new project:**
+```bash
+uv init python-project
+cd python-project
+```
+
+**Add dependencies:**
+```bash
+uv add fastapi uvicorn
+```
+
+**Remove dependencies:**
+```bash
+uv remove pytest
+```
+
+**Add extra dependencies:**
+```bash
+uv add fastapi --extra standard
+```
+
+**Run the application:**
+```bash
+uv run fastapi dev main.py
+```
+
+### Project Structure:
+```
+Day_27/python-project/
+├── pyproject.toml          # Project configuration and dependencies
+├── uv.lock                 # Lock file for reproducible installs
+├── README.md               # Project documentation
+├── main.py                 # FastAPI application
+├── .python-version         # Python version specification
+└── .venv/                  # Virtual environment (auto-created)
+```
+
+### Running the Application:
+```bash
+cd Day_27/python-project
+uv run fastapi dev main.py
+```
+Application runs on: `http://127.0.0.1:8000`
+
+### API Endpoints:
+- `GET /`: Returns a welcome message with "Hello World"
+
+### Files:
+- **main.py**: Simple FastAPI application with a root endpoint
+- **pyproject.toml**: UV configuration file with project metadata and dependencies
+- **uv.lock**: Lock file ensuring consistent dependency versions
+
+### Key Concepts:
+- **pyproject.toml**: Modern Python project configuration standard
+- **UV Lock File**: Ensures reproducible installations across environments
+- **Virtual Environment**: Automatically managed by UV
+- **Fast Installation**: Optimized package installation and dependency resolution
+
+### UV Benefits:
+- **Performance**: Much faster than traditional pip installations
+- **Simplicity**: Single tool for project and dependency management
+- **Reproducibility**: Lock files ensure consistent environments
+- **Modern Standards**: Follows current Python packaging best practices
+- **Easy Migration**: Can work with existing Python projects
+
+### Notes:
+- UV automatically creates virtual environments in `.venv` folder
+- The `uv.lock` file should be committed to version control
+- UV integrates well with existing Python development workflows
+- Perfect for modern Python projects requiring fast, reliable dependency management
+- Can be used as a drop-in replacement for pip and virtualenv
