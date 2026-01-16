@@ -65,3 +65,6 @@ python-multipart
 email-validator
 python-dotenv
 pyjwt
+
+#Day_27
+uv
