@@ -1795,3 +1795,132 @@ Application runs on: `http://127.0.0.1:8000`
 - UV integrates well with existing Python development workflows
 - Perfect for modern Python projects requiring fast, reliable dependency management
 - Can be used as a drop-in replacement for pip and virtualenv
+
+---
+# Day-28
+
+## Pydantic: Data Validation and Settings Management (Folder: Day_28)
+
+This application demonstrates Pydantic, a powerful data validation and settings management library for Python. Pydantic is the backbone of FastAPI and provides automatic data validation, serialization, and parsing. It ensures that your data is clean, correct, and exactly what you expect, handling errors gracefully without crashing your applications.
+
+### Learning Goals:
+1. What is Pydantic and why should we have it in our projects?
+2. Live Example: How Pydantic saved a startup
+3. Coding Examples so we can implement Pydantic in our projects
+
+### What is Pydantic?
+
+- **Data Validation Library**: At the core, it's all about making sure our data is clean, correct and exactly what we expect
+- **Error Handling**: Handles the errors and exceptions without crashing our systems
+- **Automatic Processing**: Does all these things behind the scenes so we don't need to add tons of code
+- **Widely Used**: Very popular and comes automatically with FastAPI and SQLModel
+
+### Key Features Demonstrated:
+
+#### Field Validation:
+- **String Length**: `min_length` and `max_length` constraints
+- **Numeric Constraints**: `gt` (greater than), `lt` (less than) for age and height validation
+- **Email Validation**: Built-in `EmailStr` for proper email format checking
+
+#### Custom Validation:
+- **Field Validators**: Using `@field_validator` decorator for custom validation logic
+- **Regex Validation**: Username must contain only letters, numbers, and underscores
+- **Uniqueness Check**: Ensuring usernames are unique across the application
+
+### Installation:
+```bash
+pip install pydantic
+pip install pydantic[email]  # For EmailStr support
+```
+
+### Code Example:
+
+The application shows the evolution from manual class definition to Pydantic-powered validation:
+
+**Before Pydantic (Manual Implementation):**
+```python
+class User():
+    def __init__(self, name, age, height):
+        self.name = name,
+        self.age = age,
+        self.height = height
+
+    def __repr__(self):
+        return f"User Attributes: Name: {self.name}, Age: {self.age}, Height: {self.height}"
+```
+
+**With Pydantic (Automatic Validation):**
+```python
+from pydantic import BaseModel, Field, EmailStr, field_validator
+import re
+
+usernames = ["kaustubh", "mukdam"]
+
+class User(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    age: int = Field(gt=18)
+    height: int = Field(gt=40, lt=70)
+    email: EmailStr
+    username: str = Field(min_length=3, max_length=20)
+
+    @field_validator("username")
+    def validate_username(cls, value):
+        if not re.match("^[a-zA-Z0-9_]+$", value):
+            raise ValueError("Username must contain only letters, numbers, and underscores")
+        if value in usernames:
+            raise ValueError("Username must be unique")
+
+        usernames.append(value)
+        return value
+```
+
+### Running the Application:
+```bash
+cd Day_28
+python main.py
+```
+
+### Validation Examples:
+
+**Valid User:**
+```python
+user = User(name="Kaustubh Mukdam", age=21, height=60, email="test@example.com", username="KDM221005")
+print(user)  # User(name='Kaustubh Mukdam', age=21, height=60, email='test@example.com', username='KDM221005')
+```
+
+**Invalid Examples:**
+- `age=15` → ValidationError: Age must be greater than 18
+- `height=30` → ValidationError: Height must be greater than 40
+- `email="invalid-email"` → ValidationError: Invalid email format
+- `username="user@123"` → ValidationError: Username must contain only letters, numbers, and underscores
+
+### Files:
+- **main.py**: Contains the Pydantic User model with comprehensive validation examples
+
+### Key Concepts:
+- **BaseModel**: Base class for all Pydantic models
+- **Field**: Function for adding validation constraints to fields
+- **EmailStr**: Special string type for email validation
+- **@field_validator**: Decorator for custom field validation logic
+- **Automatic Type Conversion**: Pydantic automatically converts types when possible
+- **Detailed Error Messages**: Clear, actionable validation error messages
+
+### Pydantic Benefits:
+- **Type Safety**: Ensures data types match expectations
+- **Automatic Validation**: No need to write manual validation code
+- **Clear Error Messages**: Helpful error messages for debugging
+- **Fast Performance**: Optimized validation with minimal overhead
+- **IDE Support**: Excellent autocomplete and type hints
+- **JSON Serialization**: Automatic conversion to/from JSON
+- **FastAPI Integration**: Seamlessly works with FastAPI's request/response models
+
+### Real-World Impact:
+Pydantic has saved countless hours of development time and prevented numerous bugs by catching data validation issues early. Many startups and large companies rely on Pydantic for robust data handling in their APIs and applications.
+
+### Notes:
+- Pydantic v2 introduced significant performance improvements and new features
+- It's the foundation of FastAPI's automatic request validation and response serialization
+- Perfect for API development, configuration management, and any scenario requiring data validation
+- Supports complex nested models, custom types, and advanced validation scenarios
+- Essential tool for modern Python development, especially with FastAPI
+
