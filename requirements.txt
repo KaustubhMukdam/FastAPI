@@ -68,3 +68,12 @@ pyjwt
 
 #Day_27
 uv
+
+#Day_29
+supabase
+fastapi
+uvicorn
+jinja2
+python-dotenv
+python-multipart
+httpx
