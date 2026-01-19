@@ -1924,3 +1924,309 @@ Pydantic has saved countless hours of development time and prevented numerous bu
 - Supports complex nested models, custom types, and advanced validation scenarios
 - Essential tool for modern Python development, especially with FastAPI
 
+---
+# Day-29
+
+## Video Streaming Platform with Supabase Storage (Folder: Day_29)
+
+This application demonstrates building a full-stack video streaming platform using FastAPI and Supabase Storage. It showcases cloud storage integration, video streaming capabilities, file upload handling, and modern web development practices with server-side templating using Jinja2.
+
+### Learning Goals:
+1. How to integrate Supabase Storage with FastAPI
+2. Implement video streaming with proper HTTP range requests
+3. Handle file uploads with multipart form data
+4. Build a modern, responsive UI with Jinja2 templates
+5. Work with environment variables for secure configuration
+
+### What is Supabase Storage?
+
+- **Cloud Storage Solution**: S3-compatible object storage built on top of PostgreSQL
+- **Public/Private Buckets**: Flexible access control for your files
+- **REST API**: Easy integration with any programming language
+- **CDN Integration**: Fast content delivery worldwide
+- **File Management**: Upload, download, delete, and list files with simple API calls
+
+### Key Features Demonstrated:
+
+#### Backend Features:
+- **Video Streaming**: Efficient video delivery using HTTP streaming with range requests
+- **File Upload**: Handle multipart form data for video file uploads
+- **Storage Integration**: Direct integration with Supabase storage buckets
+- **Error Handling**: Proper HTTP exception handling for missing videos
+- **Template Rendering**: Server-side rendering with Jinja2 for dynamic HTML
+
+#### Frontend Features:
+- **Responsive Video Grid**: Modern card-based layout for video browsing
+- **Video Player**: Native HTML5 video player with full controls
+- **Drag & Drop Upload**: Intuitive file upload with drag-and-drop support
+- **Dark Theme UI**: Netflix-inspired modern dark interface
+- **Keyboard Shortcuts**: Enhanced video player controls (Space, Arrow keys, F for fullscreen)
+- **Upload Progress**: Visual feedback during file upload process
+
+### Installation:
+
+**Install dependencies:**
+```bash
+pip install fastapi uvicorn python-dotenv supabase httpx jinja2 python-multipart
+```
+
+Or using UV:
+```bash
+uv add fastapi uvicorn python-dotenv supabase httpx jinja2 python-multipart
+```
+
+### Environment Setup:
+
+Create a `.env` file in the Day_29 directory:
+```env
+DAY_29_SUPABASE_URL=your_supabase_project_url
+DAY_29_SUPABASE_ANON_KEY=your_supabase_anon_key
+DAY_29_SUPABASE_BUCKET=your_bucket_name
+```
+
+### Supabase Setup:
+
+1. **Create a Supabase Project**: Sign up at [supabase.com](https://supabase.com)
+2. **Create a Storage Bucket**:
+   - Navigate to Storage in your project
+   - Create a new bucket (e.g., "videos")
+   - Set bucket to public for video streaming
+3. **Get Credentials**:
+   - Project URL: Found in Project Settings → API
+   - Anon Key: Found in Project Settings → API
+   - Bucket Name: The name you gave your storage bucket
+
+### Project Structure:
+```
+Day_29/
+├── main.py                 # FastAPI application with all endpoints
+├── .env                    # Environment variables (not in version control)
+├── templates/              # Jinja2 HTML templates
+│   ├── base.html          # Base template with navbar and footer
+│   ├── index.html         # Homepage with video grid
+│   ├── watch.html         # Video player page
+│   └── upload.html        # Video upload form
+├── static/                 # Static assets
+│   └── style.css          # Main stylesheet with dark theme
+└── README.md              # This file
+```
+
+### Running the Application:
+
+**Using Python:**
+```bash
+cd Day_29
+python -m uvicorn main:app --reload
+```
+
+**Using UV:**
+```bash
+cd Day_29
+uv run fastapi dev main.py
+```
+
+Application runs on: `http://127.0.0.1:8000`
+
+### API Endpoints:
+
+#### GET Endpoints:
+- `GET /`: Homepage displaying all uploaded videos in a grid
+- `GET /videos/{video_name}`: Stream video file with HTTP range support
+- `GET /watch/{video_name}`: Video player page for watching a specific video
+- `GET /upload`: Video upload form page
+
+#### POST Endpoints:
+- `POST /upload`: Handle video file upload to Supabase Storage
+  - Form fields: `title` (string), `video_file` (file)
+  - Automatically generates filename from title
+  - Returns success/error message
+
+### Key Implementation Details:
+
+#### Video Streaming:
+```python
+async def video_stream():
+    async with httpx.AsyncClient() as client:
+        async with client.stream('GET', video_url, headers={'Range': 'bytes=0-'}, timeout=None) as response:
+            async for chunk in response.aiter_bytes():
+                yield chunk
+```
+- Uses async streaming for efficient memory usage
+- Supports HTTP range requests for seeking
+- Timeout set to None for large video files
+
+#### File Upload:
+```python
+@app.post('/upload')
+async def upload_video(request: Request, title: str = Form(...), video_file: UploadFile = File(...)):
+    contents = await video_file.read()
+    file_extension = video_file.filename.split('.')[-1]
+    file_name = f"{title.replace(' ', '_')}.{file_extension}"
+    res = supabase.storage.from_(SUPABASE_BUCKET).upload(file_name, contents)
+```
+- Extracts file extension from uploaded file
+- Creates clean filename from title (spaces → underscores)
+- Uploads binary content to Supabase Storage
+
+#### Supabase Integration:
+```python
+from supabase import create_client, Client
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+# List videos
+videos = supabase.storage.from_(SUPABASE_BUCKET).list()
+
+# Get public URL
+video_url = supabase.storage.from_(SUPABASE_BUCKET).get_public_url(video_name)
+
+# Upload file
+res = supabase.storage.from_(SUPABASE_BUCKET).upload(file_name, contents)
+```
+
+### UI Features:
+
+#### Modern Dark Theme:
+- Netflix-inspired color palette
+- Glassmorphism effects on navigation
+- Smooth animations and transitions
+- Responsive design (mobile to desktop)
+
+#### Video Grid:
+- Dynamic gradient thumbnails for each video
+- Hover effects with play button overlay
+- Automatic title extraction from filename
+- Empty state when no videos exist
+
+#### Video Player:
+- Full-width responsive player
+- Native HTML5 controls
+- Keyboard shortcuts:
+  - `Space`: Play/Pause
+  - `Arrow Left`: Seek backward 5s
+  - `Arrow Right`: Seek forward 5s
+  - `F`: Toggle fullscreen
+
+#### Upload Interface:
+- Drag-and-drop file upload
+- File preview with size display
+- Visual upload progress indicator
+- Success/error message notifications
+- Form validation
+
+### Files:
+
+**Backend:**
+- **main.py**: Complete FastAPI application with video streaming, upload, and template rendering
+
+**Templates:**
+- **base.html**: Base template with navigation, footer, and common layout
+- **index.html**: Homepage with responsive video grid and empty state
+- **watch.html**: Video player page with keyboard shortcuts
+- **upload.html**: Upload form with drag-and-drop and progress indication
+
+**Styling:**
+- **style.css**: Comprehensive stylesheet with dark theme, animations, and responsive design
+
+### Key Concepts:
+
+#### Supabase Storage:
+- **Object Storage**: S3-compatible storage for files and media
+- **Public URLs**: Direct CDN URLs for public file access
+- **Storage API**: Simple REST API for file operations
+- **Bucket Management**: Organize files into separate buckets
+
+#### Video Streaming:
+- **HTTP Range Requests**: Enable seeking in video player
+- **Chunked Transfer**: Stream large files efficiently
+- **Async Streaming**: Non-blocking video delivery
+- **StreamingResponse**: FastAPI's response type for streaming data
+
+#### Template Rendering:
+- **Jinja2**: Powerful template engine for Python
+- **Template Inheritance**: Base templates with blocks for content
+- **Context Variables**: Pass data from backend to templates
+- **Filters**: Transform data in templates (e.g., string replacement)
+
+#### Form Handling:
+- **Multipart Forms**: Handle file uploads with form data
+- **Form Fields**: `Form(...)` for text inputs, `File(...)` for file uploads
+- **File Processing**: Read and process uploaded files
+- **Validation**: Check file types and handle errors
+
+### Security Considerations:
+
+1. **Environment Variables**: Never commit `.env` file to version control
+2. **File Validation**: Validate file types and sizes before upload
+3. **Storage Permissions**: Configure proper bucket access policies
+4. **API Keys**: Keep Supabase keys secure and use anon key for client-side
+5. **Error Handling**: Don't expose sensitive information in error messages
+
+### Performance Optimizations:
+
+1. **Async Streaming**: Non-blocking video delivery for better concurrency
+2. **CDN Delivery**: Supabase provides CDN for fast global access
+3. **Chunked Uploads**: Handle large files efficiently
+4. **Static File Serving**: FastAPI's StaticFiles for CSS/JS delivery
+5. **Response Caching**: Browser caching for static assets
+
+### Troubleshooting:
+
+**Videos not loading:**
+- Check if bucket is set to public in Supabase
+- Verify SUPABASE_BUCKET name matches your bucket
+- Ensure video files are uploaded correctly
+
+**Upload fails:**
+- Check file size limits in Supabase
+- Verify SUPABASE_ANON_KEY has upload permissions
+- Ensure multipart form encoding is correct
+
+**Streaming issues:**
+- Check CORS settings in Supabase
+- Verify video format is supported (MP4, WebM)
+- Ensure proper Content-Type headers
+
+### Future Enhancements:
+
+- **User Authentication**: Add login/signup with Supabase Auth
+- **Video Thumbnails**: Generate and store video thumbnails
+- **Categories/Tags**: Organize videos with metadata
+- **Search Functionality**: Search videos by title or tags
+- **Playlists**: Create and manage video playlists
+- **Comments**: Add comment system for videos
+- **Video Processing**: Transcode videos for different resolutions
+- **Analytics**: Track video views and engagement
+
+### Notes:
+
+- Supabase Storage is free up to 1GB, with paid plans for more storage
+- Video files should be in web-compatible formats (MP4 with H.264 codec recommended)
+- The application uses server-side rendering for SEO and initial page load performance
+- All frontend interactions are enhanced with vanilla JavaScript
+- The dark theme reduces eye strain for extended viewing sessions
+- Responsive design ensures great experience on all devices
+
+### Real-World Applications:
+
+This project demonstrates patterns used in production video platforms:
+- **Educational Platforms**: Course video delivery systems
+- **Content Management**: Internal video libraries for companies
+- **Social Media**: User-generated video content platforms
+- **Portfolio Sites**: Showcase video work and projects
+- **Documentation**: Video tutorials and guides
+
+### Best Practices Demonstrated:
+
+1. **Separation of Concerns**: Templates, static files, and business logic separated
+2. **Environment Configuration**: Secure credential management with dotenv
+3. **Error Handling**: Graceful error handling with proper HTTP status codes
+4. **Code Organization**: Clean, readable code with proper imports and structure
+5. **User Experience**: Loading states, error messages, and visual feedback
+6. **Responsive Design**: Mobile-first approach with breakpoints
+7. **Accessibility**: Semantic HTML and proper ARIA labels
+8. **Performance**: Async operations and efficient file handling
+
+---
+
+**Happy Streaming! 🎥**
