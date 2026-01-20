@@ -16,3 +16,4 @@ db.sqlite3
 orm.db
 dist
 pyproject.toml
+microblog.db
