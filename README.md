@@ -2228,5 +2228,402 @@ This project demonstrates patterns used in production video platforms:
 8. **Performance**: Async operations and efficient file handling
 
 ---
+# Day-30
 
-**Happy Streaming! 🎥**
+## Intermediate Social Media Backend using FastAPI (Micro-Blogging Site) (Folder: Day_30)
+
+This application demonstrates building an intermediate-level social media backend using FastAPI, implementing core features like user management, posts, likes, retweets, follows, and JWT authentication. It showcases advanced FastAPI patterns including modular routing, dependency injection, custom exceptions, and comprehensive database relationships.
+
+### Learning Goals:
+1. Build a complete social media backend with modern architecture
+2. Implement JWT authentication with proper security practices
+3. Work with complex database relationships (many-to-many, foreign keys)
+4. Create modular FastAPI applications with proper separation of concerns
+5. Handle custom exceptions and error responses
+6. Use Pydantic for data validation and serialization
+7. Implement CRUD operations with proper authorization
+
+### What is a Micro-Blogging Site?
+
+- **Social Media Platform**: Twitter/X-like platform for short-form content
+- **Real-time Interactions**: Like, retweet, and follow functionality
+- **User Authentication**: Secure user registration and login
+- **Content Management**: Create, read, update, delete posts
+- **Social Features**: Follow/unfollow users, view timelines
+
+### Key Features Demonstrated:
+
+#### User Management:
+- **User Registration**: Secure signup with password hashing
+- **JWT Authentication**: Token-based authentication with expiration
+- **User Profiles**: Basic user information management
+- **Follow System**: Many-to-many relationships for following users
+
+#### Content Management:
+- **Post Creation**: Create text-based posts with character limits
+- **Post Updates**: Edit posts within a time window (10 minutes)
+- **Post Deletion**: Delete own posts with authorization checks
+- **Timeline**: View posts from followed users
+
+#### Social Interactions:
+- **Like System**: Like/unlike posts with duplicate prevention
+- **Retweet System**: Retweet/unretweet posts
+- **Follow/Unfollow**: Follow and unfollow other users
+- **Engagement Metrics**: Count likes and retweets per post
+
+#### Advanced Features:
+- **Custom Exceptions**: Centralized error handling with HTTP status codes
+- **Modular Routing**: Separate routers for auth, users, and posts
+- **Database Relationships**: Complex SQLAlchemy relationships
+- **Pydantic Schemas**: Comprehensive data validation and serialization
+- **Dependency Injection**: Clean dependency management with FastAPI
+
+### Installation:
+
+**Install dependencies:**
+```bash
+pip install fastapi uvicorn sqlalchemy python-jose[cryptography] passlib[bcrypt] python-multipart python-dotenv
+```
+
+Or using UV:
+```bash
+uv add fastapi uvicorn sqlalchemy python-jose passlib python-multipart python-dotenv
+```
+
+### Environment Setup:
+
+Create a `.env` file in the Day_30 directory:
+```env
+DAY_30_SECURITY_KEY=your-secret-key-here
+DAY_30_ALGORITHM=HS256
+DAY_30_ACCESS_TOKEN_EXPIRE_MINUTES=30
+```
+
+### Project Structure:
+```
+Day_30/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                 # FastAPI application entry point
+│   ├── database.py             # SQLAlchemy database configuration
+│   ├── models.py               # SQLAlchemy ORM models
+│   ├── schemas.py              # Pydantic data models
+│   ├── auth.py                 # JWT authentication utilities
+│   ├── exceptions.py           # Custom exception handlers
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   ├── auth.py             # Authentication endpoints
+│   │   ├── users.py            # User management endpoints
+│   │   └── posts.py            # Post management endpoints
+│   └── microblog.db            # SQLite database file
+├── .env                        # Environment variables
+└── README.md                   # This file
+```
+
+### Database Models:
+
+#### User Model:
+```python
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(250), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(250), nullable=False)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+    posts = relationship("Post", back_populates="owner")
+    followers = relationship("User", secondary=follow, ...)
+```
+
+#### Post Model:
+```python
+class Post(Base):
+    __tablename__ = "posts"
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(String(500), nullable=False)
+    timestamp = Column(DateTime, default=datetime.now(timezone.utc))
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    owner = relationship("User", back_populates="posts")
+    likes = relationship("Like", back_populates="post")
+    retweets = relationship("Retweet", back_populates="post")
+```
+
+#### Like and Retweet Models:
+```python
+class Like(Base):
+    __tablename__ = "likes"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+
+class Retweet(Base):
+    __tablename__ = "retweets"
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    post_id = Column(Integer, ForeignKey("posts.id"), primary_key=True)
+    timestamp = Column(DateTime, default=datetime.now(timezone.utc))
+```
+
+### Running the Application:
+
+**Using Python:**
+```bash
+cd Day_30
+python -m uvicorn app.main:app --reload
+```
+
+**Using UV:**
+```bash
+cd Day_30
+uv run fastapi dev app/main.py
+```
+
+Application runs on: `http://127.0.0.1:8000`
+
+### API Endpoints:
+
+#### Authentication Routes (`/token`):
+- `POST /token`: Login and get access token (OAuth2 form data)
+
+#### User Routes (`/users`):
+- `POST /users/`: Create a new user account
+- `POST /users/{user_id}/follow`: Follow a user
+- `POST /users/{user_id}/unfollow`: Unfollow a user
+
+#### Post Routes (`/posts`):
+- `GET /posts/`: Get posts with pagination (skip, limit)
+- `GET /posts/with_counts/`: Get posts with like/retweet counts and owner usernames
+- `POST /posts/`: Create a new post (requires authentication)
+- `PUT /posts/{post_id}`: Update a post (requires ownership, within 10 minutes)
+- `DELETE /posts/{post_id}`: Delete a post (requires ownership)
+- `POST /posts/{post_id}/like`: Like a post
+- `POST /posts/{post_id}/unlike`: Unlike a post
+- `POST /posts/{post_id}/retweet`: Retweet a post
+- `POST /posts/{post_id}/unretweet`: Unretweet a post
+
+### Key Implementation Details:
+
+#### JWT Authentication:
+```python
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECURITY_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    # Decode token and validate user
+    user = db.query(models.User).filter(models.User.username == username).first()
+    return user
+```
+
+#### Custom Exceptions:
+```python
+def raise_not_found_exception(detail: str = "Not Found"):
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+
+def raise_forbidden_exception(detail: str = "Forbidden"):
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+
+def raise_unauthorized_exception(detail: str = "Unauthorized"):
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, 
+        detail=detail, 
+        headers={"WWW-Authenticate": "Bearer"}
+    )
+```
+
+#### Complex Queries:
+```python
+# Get posts with counts and owner usernames
+posts = (
+    db.query(
+        models.Post,
+        models.User.username.label("owner_username"),
+        func.coalesce(likes_subq.c.like_count, 0).label("like_count"),
+        func.coalesce(retweets_subq.c.retweet_count, 0).label("retweet_count"),
+    )
+    .join(models.User, models.Post.owner_id == models.User.id)
+    .outerjoin(likes_subq, models.Post.id == likes_subq.c.post_id)
+    .outerjoin(retweets_subq, models.Post.id == retweets_subq.c.post_id)
+    .order_by(models.Post.timestamp.desc())
+    .all()
+)
+```
+
+#### Authorization Checks:
+```python
+@router.put("/{post_id}", response_model=schemas.Post)
+def update_post(
+    post_id: int,
+    post_update: schemas.PostUpdate,
+    db: db_dependency,
+    current_user: models.User = Depends(auth.get_current_user),
+):
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if post is None:
+        raise exceptions.PostNotFoundException("Post not found.")
+    if post.owner_id != current_user.id:
+        raise exceptions.UnauthorizedException("You are not authorized to update this post.")
+    
+    # Check 10-minute edit window
+    post_timestamp_aware = post.timestamp.replace(tzinfo=timezone.utc)
+    time_since_creation = datetime.now(timezone.utc) - post_timestamp_aware
+    if time_since_creation > timedelta(minutes=10):
+        raise exceptions.ForbiddenException("You are not allowed to update this post.")
+```
+
+### Pydantic Schemas:
+
+#### User Schemas:
+```python
+class UserBase(BaseModel):
+    username: str
+    email: str
+
+class UserCreate(UserBase):
+    password: str
+
+class User(UserBase):
+    id: int
+    created_at: datetime
+    class Config:
+        from_attributes = True
+```
+
+#### Post Schemas:
+```python
+class PostBase(BaseModel):
+    content: str
+
+class Post(PostBase):
+    id: int
+    timestamp: datetime
+    owner_id: int
+
+class PostWithCounts(Post):
+    likes_count: int
+    retweets_count: int
+    owner_username: str
+```
+
+### Files:
+
+**Core Application:**
+- **main.py**: FastAPI application setup with router registration
+- **database.py**: SQLAlchemy engine and session configuration
+- **models.py**: Database models with relationships
+- **schemas.py**: Pydantic models for request/response validation
+- **auth.py**: JWT token creation and user authentication
+- **exceptions.py**: Custom HTTP exception handlers
+
+**Routes:**
+- **auth.py**: Token generation endpoint
+- **users.py**: User creation and follow/unfollow functionality
+- **posts.py**: Complete CRUD operations for posts with social features
+
+### Key Concepts:
+
+#### Database Relationships:
+- **One-to-Many**: User to Posts relationship
+- **Many-to-Many**: User follows relationship using association table
+- **One-to-Many**: Post to Likes/Retweets relationships
+
+#### Authentication Flow:
+- User registers with username, email, password
+- Password is hashed using bcrypt
+- User logs in with username/password
+- JWT token is generated and returned
+- Subsequent requests include token in Authorization header
+- Token is validated on protected endpoints
+
+#### Authorization Patterns:
+- **Ownership Checks**: Users can only modify their own posts
+- **Time-based Restrictions**: Posts can only be edited within 10 minutes
+- **Duplicate Prevention**: Users cannot like/retweet the same post twice
+- **Self-interaction Prevention**: Users cannot follow themselves
+
+#### Error Handling:
+- **Custom Exceptions**: Centralized error responses with appropriate HTTP codes
+- **Validation Errors**: Pydantic handles input validation automatically
+- **Database Errors**: Proper handling of database constraints and relationships
+
+### Security Features:
+
+1. **Password Hashing**: bcrypt for secure password storage
+2. **JWT Tokens**: Stateless authentication with configurable expiration
+3. **Input Validation**: Pydantic models prevent malicious input
+4. **SQL Injection Prevention**: SQLAlchemy parameterized queries
+5. **Authorization Checks**: Proper permission validation on all endpoints
+
+### Performance Optimizations:
+
+1. **Database Indexing**: Proper indexes on frequently queried columns
+2. **Pagination**: Skip/limit parameters for large result sets
+3. **Efficient Queries**: Subqueries for counting likes/retweets
+4. **Connection Pooling**: SQLAlchemy session management
+
+### Testing Considerations:
+
+The application structure supports comprehensive testing:
+- **Unit Tests**: Test individual functions and utilities
+- **Integration Tests**: Test API endpoints with database
+- **Authentication Tests**: Test JWT token validation
+- **Authorization Tests**: Test permission checks
+- **Database Tests**: Test relationships and constraints
+
+### Production Considerations:
+
+1. **Database Migration**: Use Alembic for schema migrations
+2. **Environment Variables**: Secure credential management
+3. **Rate Limiting**: Implement request rate limiting
+4. **Logging**: Add comprehensive application logging
+5. **Caching**: Implement Redis for session and data caching
+6. **API Documentation**: Auto-generated docs with OpenAPI/Swagger
+7. **Monitoring**: Add application performance monitoring
+
+### Future Enhancements:
+
+- **Real-time Updates**: WebSocket integration for live notifications
+- **File Uploads**: Profile pictures and post media attachments
+- **Search Functionality**: Full-text search for posts and users
+- **Notifications**: Push notifications for interactions
+- **Analytics**: User engagement and content performance metrics
+- **Admin Panel**: Content moderation and user management
+- **API Versioning**: Support multiple API versions
+- **Caching Layer**: Redis for improved performance
+
+### Real-World Applications:
+
+This backend architecture is suitable for:
+- **Social Media Platforms**: Twitter/X clones, micro-blogging sites
+- **Content Platforms**: News aggregators, community forums
+- **Professional Networks**: LinkedIn-style platforms
+- **Educational Platforms**: Student-teacher interaction systems
+- **Internal Tools**: Company communication platforms
+
+### Best Practices Demonstrated:
+
+1. **Clean Architecture**: Separation of concerns with modular design
+2. **Type Safety**: Full type hints and Pydantic validation
+3. **Error Handling**: Comprehensive exception management
+4. **Security**: Proper authentication and authorization
+5. **Database Design**: Normalized schema with proper relationships
+6. **API Design**: RESTful endpoints with consistent patterns
+7. **Code Organization**: Logical file structure and imports
+8. **Documentation**: Comprehensive inline and external documentation
+
+### Notes:
+
+- The application uses SQLite for simplicity, but can be easily adapted to PostgreSQL/MySQL
+- JWT tokens expire after 30 minutes by default (configurable)
+- Posts can only be edited within a 10-minute window after creation
+- Users cannot like/retweet their own posts (implicitly prevented)
+- The follow system uses a many-to-many relationship with an association table
+- All endpoints requiring authentication use dependency injection for current user
+- Custom exceptions provide consistent error responses across the API
+- The application demonstrates intermediate-level FastAPI patterns suitable for production use
+
+This project serves as an excellent foundation for building more complex social media platforms, demonstrating how to structure a FastAPI application with proper authentication, authorization, and database relationships.
