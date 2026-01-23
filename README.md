@@ -2627,3 +2627,372 @@ This backend architecture is suitable for:
 - The application demonstrates intermediate-level FastAPI patterns suitable for production use
 
 This project serves as an excellent foundation for building more complex social media platforms, demonstrating how to structure a FastAPI application with proper authentication, authorization, and database relationships.
+
+---
+# Day-31
+
+## FastAPI with Async SQLAlchemy and Neon Database (Folder: Day_31)
+
+This application demonstrates building a high-performance FastAPI application using async SQLAlchemy with Neon database (a serverless PostgreSQL platform). It showcases modern async database operations, connection pooling, and load testing with Locust. The application provides a simple product management API with CRUD operations, demonstrating best practices for async database interactions in FastAPI.
+
+### Learning Goals:
+1. Implement async database operations with SQLAlchemy
+2. Work with Neon database (serverless PostgreSQL)
+3. Configure connection pooling for high-performance applications
+4. Set up load testing with Locust
+5. Use FastAPI lifespan events for database initialization
+6. Handle async database sessions properly
+
+### What is Neon Database?
+
+- **Serverless PostgreSQL**: Fully managed PostgreSQL with automatic scaling
+- **Branching**: Create database branches for development and testing
+- **Auto-scaling**: Scales compute resources based on demand
+- **Point-in-time Recovery**: Restore database to any point in time
+- **Built-in Connection Pooling**: Optimized connection management
+- **Real-time Performance**: Low-latency database operations
+
+### Key Features Demonstrated:
+
+#### Async Database Operations:
+- **Async SQLAlchemy**: Non-blocking database operations with async/await
+- **Connection Pooling**: Efficient connection management with pool_size and max_overflow
+- **Async Sessions**: Proper async session handling with context managers
+- **Lifespan Events**: Database initialization during FastAPI startup
+
+#### Performance Optimization:
+- **Connection Pooling**: Configured pool_size=20, max_overflow=0 for optimal performance
+- **Pool Recycling**: Automatic connection recycling every hour
+- **Async Operations**: Non-blocking I/O for better concurrency
+- **Efficient Queries**: Optimized SQL queries with proper indexing
+
+#### Load Testing:
+- **Locust Integration**: Distributed load testing framework
+- **Realistic Scenarios**: Simulates user behavior with weighted tasks
+- **Performance Monitoring**: Track response times and error rates
+- **Scalability Testing**: Test application performance under load
+
+### Installation:
+
+**Install dependencies:**
+```bash
+pip install fastapi uvicorn sqlalchemy[asyncio] asyncpg python-dotenv locust
+```
+
+Or using UV:
+```bash
+uv add fastapi uvicorn sqlalchemy asyncpg python-dotenv locust
+```
+
+### Environment Setup:
+
+Create a `.env` file in the Day_31 directory:
+```env
+DAY_31_NEON_DATABASE_URL=postgresql+asyncpg://username:password@hostname/database
+```
+
+### Neon Database Setup:
+
+1. **Create Neon Account**: Sign up at [neon.tech](https://neon.tech)
+2. **Create Project**: Set up a new PostgreSQL project
+3. **Get Connection String**: Copy the connection string from the dashboard
+4. **Configure Environment**: Add the connection string to your `.env` file
+
+### Project Structure:
+```
+Day_31/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                 # FastAPI application with async endpoints
+│   ├── database.py             # Async SQLAlchemy configuration
+│   ├── models.py               # SQLAlchemy models
+│   ├── schemas.py              # Pydantic schemas
+│   └── locustfile.py           # Load testing configuration
+├── .env                        # Environment variables
+└── README.md                   # This file
+```
+
+### Database Model:
+
+#### Product Model:
+```python
+class Product(Base):
+    __tablename__ = "products"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True, nullable=False)
+    price = Column(Numeric(10, 2), nullable=False)
+```
+
+### Pydantic Schemas:
+
+#### Product Schemas:
+```python
+class ProductCreate(BaseModel):
+    name: str
+    price: float
+
+class ProductRead(BaseModel):
+    id: int
+    name: str
+    price: float
+
+    class Config:
+        from_attributes = True
+```
+
+### Running the Application:
+
+**Using Python:**
+```bash
+cd Day_31
+python -m uvicorn app.main:app --reload
+```
+
+**Using UV:**
+```bash
+cd Day_31
+uv run fastapi dev app/main.py
+```
+
+Application runs on: `http://127.0.0.1:8000`
+
+### API Endpoints:
+
+#### GET Endpoints:
+- `GET /`: Welcome message
+- `GET /products`: List all products
+- `GET /products/{product_id}`: Get a specific product by ID
+
+#### POST Endpoints:
+- `POST /products`: Create a new product
+
+### Key Implementation Details:
+
+#### Async Database Configuration:
+```python
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    future=True,
+    pool_size=20,        # Maximum number of connections in pool
+    max_overflow=0,      # No overflow connections
+    pool_recycle=3600,   # Recycle connections every hour
+)
+
+async_session = sessionmaker(
+    bind=engine,
+    expire_on_commit=False,
+    class_=AsyncSession,
+)
+```
+
+#### FastAPI Lifespan Events:
+```python
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await get_db()  # Initialize database tables
+    yield
+
+app = FastAPI(lifespan=lifespan)
+```
+
+#### Async CRUD Operations:
+```python
+@app.post("/products", response_model=ProductRead)
+async def create_product(
+    product: ProductCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    stmt = insert(Product).values(
+        name=product.name, 
+        price=product.price
+    ).returning(Product)
+    
+    result = await session.execute(stmt)
+    new_product = result.scalar_one_or_none()
+    
+    if not new_product:
+        raise HTTPException(status_code=400, detail="Product not created")
+    
+    await session.commit()
+    return new_product
+```
+
+### Load Testing with Locust:
+
+#### Locust Configuration:
+```python
+from locust import HttpUser, task, between
+
+class FastAPIUser(HttpUser):
+    wait_time = between(0.1, 1)  # Random wait between 0.1-1 seconds
+    
+    def on_start(self):
+        self.client.get("/")  # Initial request when user starts
+
+    @task(1)
+    def get_products(self):
+        # Task weight: 1 (lower priority)
+        if self.product_ids:
+            product_id = random.choice(list(self.product_ids))
+        else:
+            product_id = random.randint(1, 10)
+        self.client.get(f"/products/{product_id}")
+
+    @task(2)
+    def create_product(self):
+        # Task weight: 2 (higher priority)
+        payload = {
+            "name": f"Product {random.randint(1, 10000)}",
+            "price": round(random.uniform(10.0, 100.0), 2)
+        }
+        response = self.client.post("/products", json=payload)
+        if response.status_code == 200:
+            product = response.json()
+            self.product_ids.add(product["id"])
+
+    @task(3)
+    def list_products(self):
+        # Task weight: 3 (highest priority)
+        self.client.get("/products")
+```
+
+#### Running Load Tests:
+
+**Start Locust Web Interface:**
+```bash
+cd Day_31
+locust -f app/locustfile.py --host=http://127.0.0.1:8000
+```
+
+**Access Locust UI:**
+- Open browser to `http://localhost:8089`
+- Set number of users and spawn rate
+- Start the load test
+- Monitor real-time statistics
+
+**Command Line Load Testing:**
+```bash
+locust -f app/locustfile.py --host=http://127.0.0.1:8000 --users=10 --spawn-rate=2 --run-time=30s
+```
+
+### Performance Metrics:
+
+The load testing setup provides insights into:
+- **Response Times**: Average, median, 95th percentile
+- **Requests per Second**: Throughput measurement
+- **Error Rates**: Failed request percentages
+- **User Simulation**: Realistic user behavior patterns
+
+### Database Optimization:
+
+#### Connection Pool Configuration:
+- **pool_size=20**: Maintain 20 persistent connections
+- **max_overflow=0**: No additional connections beyond pool size
+- **pool_recycle=3600**: Refresh connections hourly to prevent stale connections
+- **echo=False**: Disable SQL query logging for performance
+
+#### Async Session Management:
+```python
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session() as session:
+        yield session
+```
+
+### Files:
+
+**Core Application:**
+- **main.py**: FastAPI application with async endpoints and lifespan management
+- **database.py**: Async SQLAlchemy engine configuration with connection pooling
+- **models.py**: Product model with proper indexing
+- **schemas.py**: Pydantic models for request/response validation
+
+**Testing:**
+- **locustfile.py**: Load testing configuration with realistic user scenarios
+
+### Key Concepts:
+
+#### Async SQLAlchemy:
+- **create_async_engine**: Creates async database engine
+- **AsyncSession**: Async database session for non-blocking operations
+- **async_sessionmaker**: Factory for creating async sessions
+- **execute()**: Async method for executing SQL statements
+
+#### Connection Pooling:
+- **Pool Size**: Number of persistent connections
+- **Max Overflow**: Additional connections when pool is full
+- **Pool Recycle**: Connection refresh interval
+- **Pool Pre-ping**: Connection health checks
+
+#### Lifespan Events:
+- **@asynccontextmanager**: Decorator for async context managers
+- **lifespan parameter**: FastAPI lifespan event handler
+- **Database Initialization**: Create tables on startup
+
+#### Load Testing:
+- **HttpUser**: Base class for HTTP-based load testing
+- **@task decorator**: Define user actions with weights
+- **wait_time**: Simulate realistic user think time
+- **on_start()**: Setup actions when user starts
+
+### Performance Benefits:
+
+1. **Async Operations**: Non-blocking I/O improves concurrency
+2. **Connection Pooling**: Reduces connection overhead
+3. **Optimized Queries**: Efficient database operations
+4. **Load Testing**: Identify performance bottlenecks early
+
+### Production Considerations:
+
+1. **Database Scaling**: Neon automatically scales with demand
+2. **Monitoring**: Track query performance and connection usage
+3. **Backup Strategy**: Neon provides automatic backups
+4. **Security**: Use environment variables for sensitive data
+5. **Rate Limiting**: Implement request rate limiting if needed
+6. **Caching**: Add Redis caching for frequently accessed data
+
+### Future Enhancements:
+
+- **Authentication**: Add JWT authentication for secure access
+- **Pagination**: Implement cursor-based pagination for large datasets
+- **Search**: Add full-text search capabilities
+- **Caching**: Integrate Redis for improved performance
+- **Monitoring**: Add application performance monitoring
+- **API Versioning**: Support multiple API versions
+- **Background Tasks**: Add async background job processing
+
+### Real-World Applications:
+
+This architecture is suitable for:
+- **E-commerce Platforms**: Product catalog management
+- **SaaS Applications**: Multi-tenant data management
+- **Real-time Dashboards**: High-concurrency data access
+- **API Gateways**: High-throughput service backends
+- **Data Analytics**: Fast data retrieval and processing
+
+### Best Practices Demonstrated:
+
+1. **Async First**: Use async operations for better performance
+2. **Connection Pooling**: Optimize database connection management
+3. **Load Testing**: Test application performance under realistic conditions
+4. **Environment Configuration**: Secure credential management
+5. **Error Handling**: Proper HTTP exception handling
+6. **Type Safety**: Pydantic models for data validation
+7. **Code Organization**: Clean separation of concerns
+
+### Notes:
+
+- Neon database provides excellent performance for both development and production
+- Async SQLAlchemy operations are crucial for high-performance FastAPI applications
+- Connection pooling configuration should be tuned based on application needs
+- Load testing helps identify performance bottlenecks before production deployment
+- The application demonstrates modern async Python patterns suitable for scalable applications
+
+This project showcases how to build high-performance FastAPI applications with async database operations, proper connection management, and comprehensive load testing, making it an excellent foundation for production-ready applications.
+
+---
