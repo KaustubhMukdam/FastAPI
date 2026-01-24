@@ -2996,3 +2996,358 @@ This architecture is suitable for:
 This project showcases how to build high-performance FastAPI applications with async database operations, proper connection management, and comprehensive load testing, making it an excellent foundation for production-ready applications.
 
 ---
+# Day-32
+
+## AI Agents that Debate Each Other Using Pydantic AI (Folder: Day_32)
+
+This application demonstrates building an AI-powered debate system using FastAPI and Pydantic AI. It features two opposing AI agents (representing Donald Trump and Joe Biden) that engage in structured debates on given topics. Each agent incorporates a research sub-agent to gather relevant information before formulating their responses, creating a multi-agent architecture for enhanced reasoning and argumentation.
+
+### Learning Goals:
+1. Build multi-agent AI systems with Pydantic AI
+2. Implement structured debate workflows between AI agents
+3. Use FastAPI to create AI-powered API endpoints
+4. Understand agent composition and hierarchical agent architectures
+5. Handle asynchronous AI operations in web applications
+
+### What is Pydantic AI?
+
+**Pydantic AI** is a Python framework for building production-ready AI applications with type safety and structured data handling. It provides:
+
+- **Type-Safe AI**: Full type hints and Pydantic validation for AI interactions
+- **Agent Composition**: Build complex multi-agent systems
+- **Structured Outputs**: Ensure AI responses follow specific schemas
+- **Error Handling**: Robust error handling for AI operations
+- **Async Support**: Native async/await support for concurrent AI operations
+- **Model Agnostic**: Works with OpenAI, Anthropic, and other LLM providers
+
+### Key Features Demonstrated:
+
+#### Multi-Agent Architecture:
+- **Primary Agents**: Two main debate agents (Trump and Biden personas)
+- **Research Sub-Agents**: Each primary agent has a research agent for information gathering
+- **Hierarchical Structure**: Agents can spawn sub-agents for specialized tasks
+- **Message Storage**: Persistent storage of debate exchanges
+
+#### AI Debate System:
+- **Political Personas**: Agents embody distinct political ideologies
+- **Structured Responses**: Consistent response formats from each agent
+- **Topic Analysis**: Agents research and analyze debate topics
+- **Argument Construction**: Logical argumentation based on gathered information
+
+#### FastAPI Integration:
+- **Async Endpoints**: Non-blocking AI operations
+- **Query Parameters**: Simple API for debate initiation
+- **JSON Responses**: Structured output with agent responses
+- **Error Handling**: Graceful handling of AI operation failures
+
+### Installation:
+
+**Install dependencies:**
+```bash
+pip install fastapi uvicorn pydantic-ai openai python-dotenv
+```
+
+Or using UV:
+```bash
+uv add fastapi uvicorn pydantic-ai openai python-dotenv
+```
+
+### Environment Setup:
+
+Create a `.env` file in the Day_32 directory:
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+### Project Structure:
+```
+Day_32/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                 # FastAPI application entry point
+│   └── debate/
+│       ├── __init__.py
+│       ├── agents.py           # AI agent definitions and configurations
+│       └── service.py          # Debate orchestration service
+├── .env                        # Environment variables
+└── README.md                   # This file
+```
+
+### AI Agent Architecture:
+
+#### Primary Agents:
+
+**Right-Wing Agent (Donald Trump Persona):**
+```python
+right_wing_agent = Agent(
+    'openai:gpt-4o',
+    deps_type=str,
+    result_type=str,
+    system_prompt="""
+    You are Donald Trump. You must respond in the first person, using Trump's distinctive speaking style:
+    - Use simple, direct language
+    - Repeat key phrases for emphasis
+    - Be confident and assertive
+    - Use superlatives (tremendous, fantastic, huge)
+    - Reference your achievements and deals
+    - Be critical of opponents and the 'fake news media'
+    - Use phrases like "tremendous," "the best," "nobody does it better"
+    """
+)
+```
+
+**Left-Wing Agent (Joe Biden Persona):**
+```python
+left_wing_agent = Agent(
+    'openai:gpt-4o',
+    deps_type=str,
+    result_type=str,
+    system_prompt="""
+    You are Joe Biden. You must respond in the first person, using Biden's distinctive speaking style:
+    - Use folksy, relatable language
+    - Be optimistic and unifying
+    - Reference working families and middle class
+    - Use phrases like "here's the deal," "God love ya," "malarkey"
+    - Show empathy and understanding
+    - Focus on unity and American values
+    - Reference your long career in public service
+    """
+)
+```
+
+#### Research Sub-Agents:
+
+Each primary agent includes a research sub-agent:
+```python
+research_agent = Agent(
+    'openai:gpt-4o',
+    deps_type=str,
+    result_type=str,
+    system_prompt="""
+    You are a research assistant. Your job is to:
+    1. Research the given topic thoroughly
+    2. Gather relevant facts, statistics, and context
+    3. Provide balanced information for debate preparation
+    4. Focus on accuracy and comprehensiveness
+    """
+)
+```
+
+### Running the Application:
+
+**Using Python:**
+```bash
+cd Day_32
+python -m uvicorn app.main:app --reload
+```
+
+**Using UV:**
+```bash
+cd Day_32
+uv run fastapi dev app/main.py
+```
+
+Application runs on: `http://127.0.0.1:8000`
+
+### API Endpoints:
+
+#### GET Endpoints:
+- `GET /debate?query={topic}`: Initiate a debate on a given topic
+
+### Key Implementation Details:
+
+#### Agent Execution Flow:
+```python
+async def analyze_profile(query: str) -> str:
+    # Right-wing agent researches and responds
+    result_right = await right_wing_agent.run("Here is the debate topic", deps=query)
+    message_storage.append({"agent_type": "right_wing", "message": result_right.output})
+
+    # Left-wing agent researches and responds
+    result_left = await left_wing_agent.run("Here is the debate topic", deps=query)
+    message_storage.append({"agent_type": "left_wing", "message": result_left.output})
+
+    return {
+        "Donald Trump Thoughts": result_right.output,
+        "Joe Biden Thoughts": result_left.output
+    }
+```
+
+#### Message Storage:
+```python
+message_storage = []  # Global storage for debate exchanges
+
+# Each agent response is stored with metadata
+message_storage.append({
+    "agent_type": "right_wing",
+    "message": result_right.output
+})
+```
+
+#### FastAPI Integration:
+```python
+from fastapi import FastAPI
+from app.debate.service import analyze_profile
+
+app = FastAPI()
+
+@app.get("/debate")
+async def pass_in_debate_data(query: str):
+    result = await analyze_profile(query)
+    return result
+```
+
+### Example Usage:
+
+**Request:**
+```
+GET /debate?query=climate%20change%20policy
+```
+
+**Response:**
+```json
+{
+  "Donald Trump Thoughts": "Climate change? It's a hoax! The best scientists, tremendous scientists, they tell me it's not a problem. China and India are polluting like crazy, but we're supposed to pay? No way! I made the best deals, nobody does it better than me. We'll have clean air, clean water, but we won't get ripped off by the fake news media and the radical Democrats!",
+  "Joe Biden Thoughts": "Folks, climate change is real, and it's an existential threat to our planet. Here's the deal - we need to work together as Americans to tackle this crisis. I've been fighting for the environment my whole career, from the Clean Air Act to the Paris Agreement. We can create millions of good-paying jobs in clean energy while protecting our kids' future. God love ya, but we can't afford to wait any longer!"
+}
+```
+
+### AI Agent Capabilities:
+
+#### Research Integration:
+- **Information Gathering**: Agents research topics before debating
+- **Fact-Based Arguments**: Responses grounded in researched information
+- **Context Awareness**: Understanding of current events and historical context
+- **Balanced Analysis**: Research provides comprehensive topic coverage
+
+#### Personality Emulation:
+- **Authentic Personas**: Agents embody real political figures' communication styles
+- **Consistent Voice**: Maintains character throughout the debate
+- **Rhetorical Devices**: Uses appropriate rhetorical techniques
+- **Emotional Intelligence**: Appropriate emotional responses to topics
+
+#### Debate Structure:
+- **Opening Statements**: Initial positions on the topic
+- **Evidence Presentation**: Supporting arguments with facts
+- **Counterarguments**: Addressing opposing viewpoints
+- **Closing Remarks**: Summarizing key points
+
+### Files:
+
+**Core Application:**
+- **main.py**: FastAPI application with debate endpoint
+- **debate/agents.py**: AI agent definitions and configurations
+- **debate/service.py**: Debate orchestration and message handling
+
+### Key Concepts:
+
+#### Pydantic AI Agents:
+- **Agent Class**: Core building block for AI interactions
+- **System Prompts**: Define agent behavior and personality
+- **Dependencies**: Type-safe data passing between agents
+- **Result Types**: Structured output validation
+
+#### Multi-Agent Systems:
+- **Agent Composition**: Building complex systems from simpler agents
+- **Hierarchical Agents**: Parent-child agent relationships
+- **Message Passing**: Communication between agents
+- **State Management**: Maintaining conversation context
+
+#### Async AI Operations:
+- **Non-blocking Calls**: Concurrent AI model interactions
+- **Resource Management**: Efficient handling of API rate limits
+- **Error Resilience**: Graceful handling of AI service failures
+- **Performance Optimization**: Parallel agent execution
+
+### Advanced Features:
+
+#### Agent Customization:
+- **Dynamic Prompts**: Context-aware system prompt generation
+- **Personality Scaling**: Adjustable personality intensity
+- **Topic Adaptation**: Topic-specific response strategies
+- **Learning Integration**: Potential for conversation memory
+
+#### Debate Enhancement:
+- **Multi-round Debates**: Extended conversations between agents
+- **Moderator Agent**: Neutral agent to facilitate discussions
+- **Fact-checking Agent**: Verification of claims made during debate
+- **Audience Analysis**: Sentiment analysis of debate reception
+
+#### Scalability Considerations:
+- **Agent Pooling**: Multiple instances of the same agent type
+- **Load Balancing**: Distributing requests across agent instances
+- **Caching**: Response caching for similar queries
+- **Rate Limiting**: Managing API usage costs
+
+### Production Considerations:
+
+1. **API Cost Management**: Monitor OpenAI API usage and costs
+2. **Response Caching**: Cache responses for frequently debated topics
+3. **Content Moderation**: Implement safeguards for sensitive topics
+4. **Rate Limiting**: Prevent abuse of the debate endpoint
+5. **Logging and Monitoring**: Track agent performance and usage patterns
+6. **Error Handling**: Robust error handling for AI service failures
+7. **Security**: Input validation and sanitization
+8. **Scalability**: Horizontal scaling for high-traffic scenarios
+
+### Future Enhancements:
+
+- **WebSocket Integration**: Real-time debate streaming
+- **Multi-Agent Debates**: More than two agents in a debate
+- **User Participation**: Human users joining AI debates
+- **Debate History**: Persistent storage of debate transcripts
+- **Voting System**: User voting on debate winners
+- **Topic Suggestions**: AI-generated debate topic recommendations
+- **Personality Customization**: User-defined agent personalities
+- **Multi-language Support**: Debates in different languages
+
+### Real-World Applications:
+
+This AI debate system demonstrates patterns used in:
+- **Educational Tools**: Teaching critical thinking and argumentation
+- **Content Generation**: Automated content creation for media
+- **Decision Support**: AI-assisted policy analysis and discussion
+- **Entertainment**: AI-powered interactive storytelling
+- **Research**: Automated literature review and analysis
+- **Training**: AI tutors for debate and public speaking
+- **Journalism**: Automated perspective generation for articles
+
+### Best Practices Demonstrated:
+
+1. **Type Safety**: Full type hints with Pydantic validation
+2. **Async Programming**: Non-blocking AI operations
+3. **Modular Design**: Separated concerns in agent/service architecture
+4. **Error Handling**: Comprehensive error management
+5. **Configuration Management**: Environment-based configuration
+6. **Code Organization**: Logical file structure and imports
+7. **Documentation**: Clear inline and external documentation
+
+### Ethical Considerations:
+
+1. **Bias Awareness**: Understanding potential biases in AI responses
+2. **Fact Verification**: Importance of grounding AI responses in facts
+3. **Transparency**: Clear indication that responses are AI-generated
+4. **Responsible Use**: Appropriate applications for AI debate systems
+5. **Content Guidelines**: Establishing boundaries for debate topics
+6. **User Safety**: Protecting users from harmful or misleading content
+
+### Performance Optimization:
+
+1. **Concurrent Execution**: Running multiple agents simultaneously
+2. **Response Caching**: Avoiding redundant API calls
+3. **Prompt Optimization**: Efficient prompt engineering
+4. **Model Selection**: Choosing appropriate AI models for the task
+5. **Batch Processing**: Handling multiple debate requests efficiently
+
+### Notes:
+
+- The application uses OpenAI's GPT-4o model for high-quality responses
+- Agents maintain consistent personas throughout debates
+- Research sub-agents provide factual grounding for arguments
+- The system demonstrates advanced multi-agent AI architectures
+- Pydantic AI provides type safety and structured AI interactions
+- The debate system can be extended to include more agents or topics
+- Real-world applications require careful consideration of ethical implications
+- The architecture is scalable and can handle complex multi-agent scenarios
+
+This project showcases how to build sophisticated AI applications using FastAPI and Pydantic AI, demonstrating the power of multi-agent systems for complex reasoning and interaction tasks.
