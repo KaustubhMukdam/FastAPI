@@ -81,3 +81,7 @@ httpx
 #Day_31
 asyncpg
 locust
+
+#Day_32
+duckduckgo_search
+pydantic-ai
