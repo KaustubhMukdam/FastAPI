@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Real-Time Notifications{% endblock %}
+
+{% block extra_css %}
+<style>
+    #ws-status {
+        padding: 1rem;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    #ws-status.connected {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    #ws-status.disconnected {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .notification-item {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s;
+    }
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-item:hover {
+        background: #f9f9f9;
+    }
+
+    .notification-item.new {
+        animation: highlight 0.8s ease;
+    }
+
+    @keyframes highlight {
+        0% { background: #e3f2fd; }
+        100% { background: white; }
+    }
+
+    .notification-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .user-badge {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .timestamp {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+    }
+
+    .message {
+        color: var(--text-primary);
+        line-height: 1.5;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-muted);
+    }
+
+    .empty-state svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="ws-status" class="disconnected">🔌 Connecting to WebSocket...</div>
+
+<div class="card">
+    <h2>📝 Create New Notification</h2>
+    <form id="notification-form">
+        <div class="form-group">
+            <label for="user_id">User ID:</label>
+            <input type="number" id="user_id" name="user_id" required min="1" placeholder="Enter user ID">
+        </div>
+        <div class="form-group">
+            <label for="message">Message:</label>
+            <textarea id="message" name="message" required placeholder="Enter notification message..."></textarea>
+        </div>
+        <button type="submit" id="submit-btn">Send Notification</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>📬 Recent Notifications (Last 7)</h2>
+    <div id="notifications-list">
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <p>No notifications yet. Create one to get started!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let ws;
+    const wsStatus = document.getElementById('ws-status');
+    const notificationsList = document.getElementById('notifications-list');
+    const form = document.getElementById('notification-form');
+    const submitBtn = document.getElementById('submit-btn');
+
+    // WebSocket connection
+    function connectWebSocket() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+        
+        ws.onopen = () => {
+            console.log('WebSocket connected');
+            wsStatus.textContent = '✅ Connected - Real-time updates active';
+            wsStatus.className = 'connected';
+        };
+        
+        ws.onmessage = (event) => {
+            console.log('Received message:', event.data);
+            try {
+                const data = JSON.parse(event.data);
+                if (data.action === 'new_notification') {
+                    addNotificationToList(data.data, true);
+                }
+            } catch (error) {
+                console.error('Error parsing WebSocket message:', error);
+            }
+        };
+        
+        ws.onclose = () => {
+            console.log('WebSocket disconnected');
+            wsStatus.textContent = '❌ Disconnected - Attempting to reconnect...';
+            wsStatus.className = 'disconnected';
+            setTimeout(connectWebSocket, 3000);
+        };
+        
+        ws.onerror = (error) => {
+            console.error('WebSocket error:', error);
+        };
+    }
+
+    // Load existing notifications
+    async function loadNotifications() {
+        try {
+            const response = await fetch('/notifications');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const notifications = await response.json();
+            
+            notificationsList.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                showEmptyState();
+            } else {
+                notifications.forEach(notif => addNotificationToList(notif, false));
+            }
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            notificationsList.innerHTML = '<div class="alert alert-error">Failed to load notifications. Please refresh the page.</div>';
+        }
+    }
+
+    // Show empty state
+    function showEmptyState() {
+        notificationsList.innerHTML = `
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <p>No notifications yet. Create one to get started!</p>
+            </div>
+        `;
+    }
+
+    // Add notification to list
+    function addNotificationToList(notif, isNew) {
+        // Remove empty state if exists
+        const emptyState = notificationsList.querySelector('.empty-state');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
+        const div = document.createElement('div');
+        div.className = 'notification-item' + (isNew ? ' new' : '');
+        
+        const timestamp = notif.created_at 
+            ? new Date(notif.created_at).toLocaleString() 
+            : new Date().toLocaleString();
+        
+        div.innerHTML = `
+            <div class="notification-header">
+                <span class="user-badge">User #${notif.user_id}</span>
+                <span class="timestamp">${timestamp}</span>
+            </div>
+            <div class="message">${escapeHtml(notif.message)}</div>
+        `;
+        
+        if (isNew) {
+            notificationsList.insertBefore(div, notificationsList.firstChild);
+            // Remove if more than 7 notifications
+            while (notificationsList.children.length > 7) {
+                notificationsList.removeChild(notificationsList.lastChild);
+            }
+        } else {
+            notificationsList.appendChild(div);
+        }
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = {
+            user_id: parseInt(document.getElementById('user_id').value),
+            message: document.getElementById('message').value.trim()
+        };
+
+        if (!formData.message) {
+            alert('Message cannot be empty');
+            return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+        
+        try {
+            const response = await fetch('/notifications', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+            
+            if (response.ok) {
+                form.reset();
+                console.log('Notification sent successfully');
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.detail || 'Failed to create notification'}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Network error. Please try again.');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Notification';
+        }
+    });
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        connectWebSocket();
+        loadNotifications();
+    });
+</script>
+{% endblock %}
