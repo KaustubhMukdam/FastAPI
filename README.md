@@ -3351,3 +3351,412 @@ This AI debate system demonstrates patterns used in:
 - The architecture is scalable and can handle complex multi-agent scenarios
 
 This project showcases how to build sophisticated AI applications using FastAPI and Pydantic AI, demonstrating the power of multi-agent systems for complex reasoning and interaction tasks.
+
+---
+# Day-33
+
+## Real-Time Notification System with FastAPI, WebSockets, and Async SQLAlchemy (Folder: Day_33)
+
+This application demonstrates building a real-time notification system using FastAPI, WebSockets, async SQLAlchemy, and server-side templating with Jinja2. It showcases modern web development practices including real-time communication, async database operations, and responsive UI design. The system allows users to create notifications that are instantly broadcast to all connected WebSocket clients, providing a live notification feed.
+
+### Learning Goals:
+1. Implement real-time communication with WebSockets in FastAPI
+2. Work with async SQLAlchemy for high-performance database operations
+3. Build responsive web interfaces with server-side templating
+4. Handle WebSocket connections and broadcasting
+5. Create modern, interactive web applications with vanilla JavaScript
+6. Implement proper error handling and connection management
+
+### What is Real-Time Communication?
+
+- **WebSockets**: Bidirectional communication protocol for real-time data exchange
+- **Live Updates**: Instant notification delivery without page refreshes
+- **Connection Management**: Handling multiple concurrent WebSocket connections
+- **Broadcasting**: Sending messages to all connected clients simultaneously
+- **Persistent Connections**: Maintaining long-lived connections for real-time features
+
+### Key Features Demonstrated:
+
+#### Backend Features:
+- **Async Database Operations**: Non-blocking database interactions with async SQLAlchemy
+- **WebSocket Integration**: Real-time bidirectional communication
+- **Connection Manager**: Efficient handling of multiple WebSocket connections
+- **Broadcast System**: Instant message delivery to all connected clients
+- **RESTful API**: Traditional HTTP endpoints for notification management
+- **Lifespan Events**: Proper application startup and database initialization
+
+#### Frontend Features:
+- **Real-Time Updates**: Live notification feed without page refreshes
+- **Responsive Design**: Modern, mobile-friendly interface
+- **Interactive Forms**: Dynamic form submission with loading states
+- **Connection Status**: Visual WebSocket connection indicators
+- **Auto-Reconnection**: Automatic reconnection on connection loss
+- **Animation Effects**: Smooth UI transitions and visual feedback
+
+#### Database Features:
+- **Async SQLAlchemy**: High-performance async database operations
+- **Neon Database**: Serverless PostgreSQL with automatic scaling
+- **Connection Pooling**: Efficient database connection management
+- **Migration Support**: Automatic table creation on startup
+
+### Installation:
+
+**Install dependencies:**
+```bash
+pip install fastapi uvicorn sqlalchemy[asyncio] asyncpg python-dotenv jinja2
+```
+
+Or using UV:
+```bash
+uv add fastapi uvicorn sqlalchemy asyncpg python-dotenv jinja2
+```
+
+### Environment Setup:
+
+Create a `.env` file in the Day_33 directory:
+```env
+DAY_33_NEON_DATABASE_URL=postgresql+asyncpg://username:password@hostname/database
+```
+
+### Neon Database Setup:
+
+1. **Create Neon Account**: Sign up at [neon.tech](https://neon.tech)
+2. **Create Project**: Set up a new PostgreSQL project
+3. **Get Connection String**: Copy the connection string from the dashboard
+4. **Configure Environment**: Add the connection string to your `.env` file
+
+### Project Structure:
+```
+Day_33/
+├── app/
+│   ├── main.py                 # FastAPI application with WebSocket endpoints
+│   ├── database.py             # Async SQLAlchemy configuration
+│   ├── models.py               # SQLAlchemy models
+│   ├── schemas.py              # Pydantic schemas
+│   └── templates/
+│       ├── base.html          # Base template with common layout
+│       └── index.html         # Main page with notification interface
+├── .env                        # Environment variables
+└── README.md                   # This file
+```
+
+### Database Model:
+
+#### Notification Model:
+```python
+class Notification(Base):
+    __tablename__ = 'notifications'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+```
+
+### Pydantic Schemas:
+
+#### Notification Schemas:
+```python
+class NotificationCreate(BaseModel):
+    user_id: int
+    message: str
+
+class NotificationRead(BaseModel):
+    id: int
+    user_id: int
+    message: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+```
+
+### Running the Application:
+
+**Using Python:**
+```bash
+cd Day_33
+python -m uvicorn app.main:app --reload
+```
+
+**Using UV:**
+```bash
+cd Day_33
+uv run fastapi dev app/main.py
+```
+
+Application runs on: `http://127.0.0.1:8000`
+
+### API Endpoints:
+
+#### GET Endpoints:
+- `GET /`: Homepage displaying the notification interface
+- `GET /notifications`: Retrieve the last 7 notifications (JSON response)
+
+#### POST Endpoints:
+- `POST /notifications`: Create a new notification and broadcast it via WebSocket
+
+#### WebSocket Endpoints:
+- `WebSocket /ws`: Real-time WebSocket connection for live updates
+
+### Key Implementation Details:
+
+#### WebSocket Connection Management:
+```python
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: str):
+        disconnected = []
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except Exception:
+                disconnected.append(connection)
+        for connection in disconnected:
+            self.disconnect(connection)
+```
+
+#### FastAPI Lifespan Events:
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await init_db()  # Initialize database tables
+    yield
+
+app = FastAPI(lifespan=lifespan)
+```
+
+#### Notification Creation with Broadcasting:
+```python
+@app.post("/notifications", response_model=NotificationRead)
+async def create_notification(
+    notif: NotificationCreate,
+    session: AsyncSession = Depends(get_session)
+):
+    stmt = insert(Notification).values(
+        user_id=notif.user_id,
+        message=notif.message
+    ).returning(Notification)
+
+    result = await session.execute(stmt)
+    new_notif = result.scalar_one()
+    await session.commit()
+
+    # Broadcast to all connected WebSocket clients
+    message_to_broadcast = {
+        "action": "new_notification",
+        "data": {
+            "id": new_notif.id,
+            "user_id": new_notif.user_id,
+            "message": new_notif.message
+        }
+    }
+    await manager.broadcast(message_to_broadcast)
+
+    return new_notif
+```
+
+#### WebSocket Endpoint:
+```python
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            await websocket.receive_text()  # Keep connection alive
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+```
+
+### Frontend Implementation:
+
+#### Real-Time Updates:
+```javascript
+// WebSocket connection
+function connectWebSocket() {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+    
+    ws.onopen = () => {
+        wsStatus.textContent = '✅ Connected - Real-time updates active';
+        wsStatus.className = 'connected';
+    };
+    
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.action === 'new_notification') {
+            addNotificationToList(data.data, true);
+        }
+    };
+    
+    ws.onclose = () => {
+        wsStatus.textContent = '❌ Disconnected - Attempting to reconnect...';
+        setTimeout(connectWebSocket, 3000);
+    };
+}
+```
+
+#### Dynamic Notification Display:
+```javascript
+function addNotificationToList(notif, isNew) {
+    const div = document.createElement('div');
+    div.className = 'notification-item' + (isNew ? ' new' : '');
+    
+    div.innerHTML = `
+        <div class="notification-header">
+            <span class="user-badge">User #${notif.user_id}</span>
+            <span class="timestamp">${new Date().toLocaleString()}</span>
+        </div>
+        <div class="message">${escapeHtml(notif.message)}</div>
+    `;
+    
+    if (isNew) {
+        notificationsList.insertBefore(div, notificationsList.firstChild);
+    } else {
+        notificationsList.appendChild(div);
+    }
+}
+```
+
+### UI Features:
+
+#### Modern Dark Theme:
+- Netflix-inspired color palette
+- Glassmorphism effects and subtle shadows
+- Smooth animations and transitions
+- Responsive design (mobile to desktop)
+
+#### Real-Time Interface:
+- Live connection status indicator
+- Instant notification updates
+- Form submission with loading states
+- Auto-reconnection on disconnection
+- Highlight animations for new notifications
+
+#### Interactive Elements:
+- Drag-and-drop file upload (if extended)
+- Keyboard shortcuts for enhanced UX
+- Loading states and error handling
+- Mobile-responsive design
+
+### Files:
+
+**Backend:**
+- **main.py**: FastAPI application with WebSocket support and notification endpoints
+- **database.py**: Async SQLAlchemy configuration with Neon database
+- **models.py**: Notification model with proper indexing
+- **schemas.py**: Pydantic models for request/response validation
+
+**Frontend:**
+- **templates/base.html**: Base template with navigation and common styling
+- **templates/index.html**: Main interface with real-time notification system
+
+### Key Concepts:
+
+#### WebSocket Communication:
+- **Bidirectional**: Full-duplex communication between client and server
+- **Persistent Connections**: Long-lived connections for real-time features
+- **Event-Driven**: Message-based communication with JSON payloads
+- **Connection Lifecycle**: Proper handling of connect/disconnect events
+
+#### Async Database Operations:
+- **Non-blocking I/O**: Concurrent database operations without blocking
+- **Connection Pooling**: Efficient management of database connections
+- **Async Sessions**: Proper async session handling with context managers
+- **Performance**: Better scalability with async operations
+
+#### Server-Side Templating:
+- **Jinja2**: Powerful template engine for Python
+- **Template Inheritance**: Base templates with blocks for content
+- **Dynamic Content**: Server-rendered HTML with data injection
+- **Static Assets**: CSS and JavaScript integration
+
+#### Real-Time Architecture:
+- **Broadcast Pattern**: One-to-many message distribution
+- **Connection Management**: Tracking and managing active connections
+- **Error Resilience**: Graceful handling of connection failures
+- **Scalability**: Foundation for horizontal scaling
+
+### Security Considerations:
+
+1. **Input Validation**: Pydantic models prevent malicious input
+2. **XSS Prevention**: HTML escaping in templates and JavaScript
+3. **Connection Limits**: Prevent excessive WebSocket connections
+4. **Rate Limiting**: Implement request rate limiting for API endpoints
+5. **Authentication**: Add user authentication for production use
+6. **Data Sanitization**: Clean user input before database storage
+
+### Performance Optimizations:
+
+1. **Async Operations**: Non-blocking I/O for better concurrency
+2. **Connection Pooling**: Efficient database connection management
+3. **Message Batching**: Group multiple notifications for broadcast
+4. **Caching**: Implement caching for frequently accessed data
+5. **Compression**: Enable WebSocket message compression
+6. **Load Balancing**: Distribute connections across multiple servers
+
+### Production Considerations:
+
+1. **WebSocket Scaling**: Use Redis for cross-server broadcasting
+2. **Database Optimization**: Add proper indexing and query optimization
+3. **Monitoring**: Implement application performance monitoring
+4. **Logging**: Add comprehensive logging for debugging
+5. **Security**: Implement proper authentication and authorization
+6. **Backup**: Set up database backup and recovery procedures
+7. **Testing**: Add comprehensive unit and integration tests
+
+### Future Enhancements:
+
+- **User Authentication**: Add login/signup with JWT tokens
+- **Notification History**: Persistent storage with pagination
+- **Push Notifications**: Browser push notifications for offline users
+- **Notification Types**: Different notification categories and priorities
+- **User Management**: User profiles and notification preferences
+- **Analytics**: Track notification engagement and user behavior
+- **Mobile App**: Native mobile application with push notifications
+- **Admin Panel**: Notification management and user administration
+
+### Real-World Applications:
+
+This real-time notification system demonstrates patterns used in:
+- **Social Media Platforms**: Live feed updates and notifications
+- **Chat Applications**: Real-time messaging and presence indicators
+- **Collaborative Tools**: Live document editing and comments
+- **Gaming Platforms**: Live score updates and multiplayer interactions
+- **Financial Applications**: Real-time price updates and alerts
+- **IoT Dashboards**: Live sensor data and device status updates
+- **News Platforms**: Breaking news alerts and live updates
+
+### Best Practices Demonstrated:
+
+1. **Async First**: Use async operations for better performance
+2. **Clean Architecture**: Separation of concerns with modular design
+3. **Error Handling**: Comprehensive exception handling and user feedback
+4. **Real-Time Communication**: Proper WebSocket implementation
+5. **Responsive Design**: Mobile-first approach with modern UI
+6. **Security**: Input validation and XSS prevention
+7. **Scalability**: Foundation for high-concurrency applications
+
+### Notes:
+
+- The application uses Neon database for reliable, serverless PostgreSQL
+- WebSocket connections provide instant, real-time updates
+- Async SQLAlchemy ensures high performance with concurrent operations
+- The UI is fully responsive and works across all devices
+- Connection management handles disconnections gracefully
+- Broadcasting ensures all connected clients receive updates simultaneously
+- The architecture is scalable and can handle multiple concurrent users
+- Perfect for applications requiring real-time features and live updates
+
+This project showcases how to build modern, real-time web applications using FastAPI's WebSocket support, async database operations, and responsive web interfaces, providing a solid foundation for applications requiring live communication and instant updates.
+
+---
