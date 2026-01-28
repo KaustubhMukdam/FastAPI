@@ -3760,3 +3760,13 @@ This real-time notification system demonstrates patterns used in:
 This project showcases how to build modern, real-time web applications using FastAPI's WebSocket support, async database operations, and responsive web interfaces, providing a solid foundation for applications requiring live communication and instant updates.
 
 ---
+# Day-34
+
+## FastAPI Application which follows all the best practices (Folder: Day_34)
+This contains the following layers
+- The Domain Layer
+- The Application Layer
+- The Infrastructure Layer
+And unit testing and end to end testing
+We would also be using Neon Database
+For this we have taken 2 things: Todo and User (with proper authentication)
