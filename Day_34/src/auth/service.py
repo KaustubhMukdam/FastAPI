@@ -38,7 +38,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User | bool:
 def create_access_token(email: str, user_id: UUID, expires_delta: timedelta | None = None) -> str:
     encode = {
         'sub' : email,
-        'id' : user_id,
+        'id' : str(user_id),
         'exp' : datetime.now(timezone.utc) + expires_delta if expires_delta else datetime.now(timezone.utc) + timedelta(minutes=15)
     }
 
@@ -51,7 +51,7 @@ def verify_token(token: str) -> model.TokenData:
         return model.TokenData(user_id=user_id)
     except PyJWTError as e:
         logging.warning(f"Token Verification Failed: {str(e)}")
-        return AuthenticationError()
+        raise AuthenticationError()
     
 def register_user(db:Session, register_user_request: model.RegisterUserRequest) -> None:
     try:
@@ -74,7 +74,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> model.Tok
 CurrentUser = Annotated[model.TokenData, Depends(get_current_user)]
 
 def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Session) -> model.Token:
-    user = authenticate_user(form_data.username, form_data.password, db)
+    user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise AuthenticationError()
     

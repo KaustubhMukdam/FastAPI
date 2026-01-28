@@ -11,6 +11,6 @@ app = FastAPI()
 
 # Create database tables
 # While testing, we would comment this out to avoid recreating tables
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 register_routes(app)

@@ -14,7 +14,7 @@ class TodoCreate(TodoBase):
 
 class TodoResponse(TodoBase):
     id: UUID
-    is_complete: bool
+    is_completed: bool
     completed_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)

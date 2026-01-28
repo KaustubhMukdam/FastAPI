@@ -39,8 +39,14 @@ def update_todo(current_user: TokenData, db: Session, todo_id: UUID, todo: model
     if todo_to_update is None:
         logging.warning(f"Todo not found with ID: {todo_id}")
         raise TodoNotFoundError(todo_id)
-    todo_to_update.description = todo.description
-    todo_to_update.is_completed = todo.is_completed
+    if todo.description is not None:
+        todo_to_update.description = todo.description
+    if todo.is_completed is not None:
+        todo_to_update.is_completed = todo.is_completed
+    if todo.due_date is not None:
+        todo_to_update.due_date = todo.due_date
+    if todo.priority is not None:
+        todo_to_update.priority = todo.priority
     db.commit()
     db.refresh(todo_to_update)
     logging.info(f"Successfully updated todo with ID: {todo_id}")
