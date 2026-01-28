@@ -1,0 +1,3 @@
+fastapi
+uvicorn
+slowapi #Used for rate limiting at a certain endpoint   (Saves from DDoS attacks)
