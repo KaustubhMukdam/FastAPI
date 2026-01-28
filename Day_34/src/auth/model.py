@@ -18,3 +18,8 @@ class TokenData(BaseModel):
         if self.user_id is not None:
             return UUID(str(self.user_id))
         return None
+    
+class TodoCreate(BaseModel):
+    description: str
+    due_date: str | None = None
+    priority: str | None = None
