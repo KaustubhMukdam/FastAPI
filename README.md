@@ -3353,7 +3353,131 @@ This AI debate system demonstrates patterns used in:
 This project showcases how to build sophisticated AI applications using FastAPI and Pydantic AI, demonstrating the power of multi-agent systems for complex reasoning and interaction tasks.
 
 ---
-# Day-33
+# Day-34
+
+## Advanced FastAPI Application with Rate Limiting, Authentication, and Modular Architecture (Folder: Day_34)
+
+This application demonstrates building a production-ready FastAPI application with advanced features including rate limiting, JWT authentication, modular architecture, comprehensive testing, and proper logging. It implements a Todo management system with user authentication, showcasing modern FastAPI development practices and clean architecture principles.
+
+### Learning Goals:
+1. Implement rate limiting to protect against DDoS attacks
+2. Build modular FastAPI applications with clean architecture
+3. Implement JWT authentication with proper security practices
+4. Create comprehensive unit tests with pytest and httpx
+5. Set up proper logging configuration
+6. Use dependency injection and service layer patterns
+7. Handle custom exceptions and error responses
+8. Work with SQLAlchemy ORM for database operations
+
+### What is Rate Limiting?
+
+- **DDoS Protection**: Prevents Distributed Denial of Service attacks by limiting request rates
+- **API Protection**: Safeguards API endpoints from abuse and excessive usage
+- **Resource Management**: Ensures fair resource allocation among users
+- **Performance**: Maintains application performance under high load
+- **Cost Control**: Prevents excessive API usage and associated costs
+
+### Key Features Demonstrated:
+
+#### Security & Performance:
+- **Rate Limiting**: Using SlowAPI to limit requests per IP address
+- **JWT Authentication**: Secure token-based authentication
+- **Password Hashing**: bcrypt for secure password storage
+- **Input Validation**: Pydantic models for data validation
+- **Custom Exceptions**: Centralized error handling
+
+#### Architecture & Testing:
+- **Modular Design**: Clean separation of concerns with controllers, services, and models
+- **Dependency Injection**: Proper service layer architecture
+- **Comprehensive Testing**: Unit tests for all major components
+- **Logging**: Structured logging with configurable levels
+- **Database Integration**: SQLAlchemy ORM with SQLite
+
+#### User Management:
+- **User Registration**: Secure user creation with validation
+- **Authentication**: JWT token generation and validation
+- **Profile Management**: User data management
+
+#### Todo Management:
+- **CRUD Operations**: Create, read, update, delete todos
+- **User Ownership**: Todos belong to specific users
+- **Authorization**: Users can only access their own todos
+
+### Installation:
+
+**Install dependencies:**
+```bash
+pip install -r Day_34/requirements.txt
+pip install -r Day_34/requirements-dev.txt
+```
+
+Or using UV:
+```bash
+uv add fastapi uvicorn slowapi sqlalchemy python-jose passlib python-multipart pytest pytest-asyncio httpx black ruff
+```
+
+### Project Structure:
+```
+Day_34/
+├── requirements.txt              # Production dependencies
+├── requirements-dev.txt          # Development dependencies
+├── test.db                       # SQLite database file
+├── src/
+│   ├── __init__.py
+│   ├── main.py                   # FastAPI application entry point
+│   ├── api.py                    # Route registration
+│   ├── exceptions.py             # Custom exception handlers
+│   ├── logging.py                # Logging configuration
+│   ├── rate_limiting.py          # Rate limiting setup
+│   ├── auth/                     # Authentication module
+│   │   ├── __init__.py
+│   │   ├── controller.py         # Auth endpoints
+│   │   ├── model.py              # Auth data models
+│   │   └── service.py            # Auth business logic
+│   ├── database/                 # Database module
+│   │   ├── __init__.py
+│   │   └── core.py               # Database configuration
+│   ├── entities/                 # Domain entities
+│   │   ├── __init__.py
+│   │   ├── todo.py               # Todo entity
+│   │   └── user.py               # User entity
+│   ├── todos/                    # Todo module
+│   │   ├── __init__.py
+│   │   ├── controller.py         # Todo endpoints
+│   │   ├── model.py              # Todo data models
+│   │   └── service.py            # Todo business logic
+│   └── users/                    # User module
+│       ├── __init__.py
+│       ├── controller.py         # User endpoints
+│       ├── model.py              # User data models
+│       └── service.py            # User business logic
+└── tests/                        # Test suite
+    ├── __init__.py
+    ├── conftest.py               # Test configuration
+    ├── test_auth_service.py      # Auth service tests
+    ├── test_todo_service.py      # Todo service tests
+    └── test_user_service.py      # User service tests
+```
+
+### Database Models:
+
+#### User Model:
+```python
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    hashed_password = Column(String(100), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    todos = relationship("Todo", back_populates="owner")
+```
+
+#### Todo Model:
+```python
+class Todo(Base):
 
 ## Real-Time Notification System with FastAPI, WebSockets, and Async SQLAlchemy (Folder: Day_33)
 
@@ -3770,3 +3894,9 @@ This contains the following layers
 And unit testing and end to end testing
 We would also be using Neon Database
 For this we have taken 2 things: Todo and User (with proper authentication)
+
+
+---
+# Day-35
+
+## Financial Advisor AI Agent using FastAPI and Groq (Folder: Day_35)
