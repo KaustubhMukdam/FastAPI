@@ -4451,5 +4451,221 @@ By completing this project, you will understand:
 This project showcases how to build modern, AI-powered web applications using FastAPI and Pydantic-AI, providing a solid foundation for financial technology applications, personal finance tools, and any system requiring intelligent analysis of structured data.
 
 ---
+# Day-36
 
-**Happy Coding! 🚀💰**
+# Fitness Advisor - AI-Powered Fitness & Nutrition Planner (Folder: Day_36)
+
+A modern web application built with FastAPI and Jinja2 that generates personalized fitness and nutrition plans using AI.
+
+## Features
+
+- 🏋️ **Personalized Workout Plans** - Custom exercise routines based on your fitness level and goals
+- 🥗 **Nutrition Plans** - Balanced meal plans with calculated macros
+- 📊 **Calorie Tracking** - Daily calorie targets based on your profile
+- 💡 **Expert Tips** - Motivational quotes and professional advice
+- 📅 **Weekly Schedules** - Organized workout and meal schedules
+- 🎨 **Modern UI** - Clean, responsive design with smooth animations
+
+## Tech Stack
+
+- **Backend**: FastAPI
+- **Frontend**: Jinja2 Templates, HTML, CSS, JavaScript
+- **AI**: Pydantic AI with Cerebras LLM
+- **Styling**: Custom CSS with modern design principles
+
+## Project Structure
+
+```
+Day_36/
+├── app/
+│   ├── main.py                    # FastAPI application entry point
+│   └── fitness_advisor/
+│       ├── controller.py          # API routes and template rendering
+│       ├── model.py              # Pydantic models
+│       └── service.py            # AI agent logic
+├── templates/
+│   ├── base.html                 # Base template
+│   ├── index.html                # Home page
+│   ├── form.html                 # Fitness profile form
+│   └── result.html               # Results display
+├── static/
+│   ├── css/
+│   │   └── style.css            # Main stylesheet
+│   └── js/
+│       └── script.js            # JavaScript utilities
+└── venv/                         # Virtual environment
+```
+
+## Setup Instructions
+
+### 1. Prerequisites
+
+- Python 3.11+
+- pip (Python package manager)
+- Cerebras API key
+
+### 2. Installation
+
+```bash
+# Clone or navigate to your project directory
+cd D:\Programming\FastAPI\Day_36
+
+# Create virtual environment (if not already created)
+python -m venv venv
+
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On Linux/Mac:
+source venv/bin/activate
+
+# Install dependencies
+pip install fastapi uvicorn jinja2 pydantic-ai python-multipart
+```
+
+### 3. File Setup
+
+Replace the following files with the updated versions:
+
+1. **app/main.py** - Updated with static files mounting
+2. **app/fitness_advisor/controller.py** - Updated with template routes
+3. **app/fitness_advisor/service.py** - Fixed Agent syntax
+
+Create new directories and files:
+
+```bash
+# Create directories
+mkdir templates
+mkdir static
+mkdir static/css
+mkdir static/js
+
+# Copy the template files
+# - base.html
+# - index.html
+# - form.html
+# - result.html
+
+# Copy the static files
+# - static/css/style.css
+# - static/js/script.js
+```
+
+### 4. Environment Setup
+
+Set your Cerebras API key:
+
+```powershell
+# PowerShell (Windows)
+$env:CEREBRAS_API_KEY="your-api-key-here"
+```
+
+```bash
+# Bash (Linux/Mac)
+export CEREBRAS_API_KEY="your-api-key-here"
+```
+
+### 5. Run the Application
+
+```bash
+uvicorn app.main:app --reload
+```
+
+The application will be available at: **http://127.0.0.1:8000**
+
+## Usage
+
+### Web Interface
+
+1. **Home Page** (`/`)
+   - View features and benefits
+   - Click "Start Your Journey" to begin
+
+2. **Form Page** (`/form`)
+   - Fill in your personal information
+   - Select fitness goals and activity level
+   - Add optional details (equipment, restrictions, injuries)
+   - Submit to generate your plan
+
+3. **Result Page** (`/result`)
+   - View your personalized fitness plan
+   - Print or save your plan
+   - Create a new plan if needed
+
+### API Endpoint
+
+You can also use the API directly:
+
+```bash
+POST /analyze
+Content-Type: application/json
+
+{
+  "age": 21,
+  "weight": 70,
+  "height": 188,
+  "gender": "Male",
+  "activity_level": "sedentary",
+  "fitness_goal": "weight_loss",
+  "workout_days_per_week": 2,
+  "preferred_workout_time": "Morning",
+  "available_equipment": ["Walking"],
+  "dietary_restrictions": null,
+  "injuries": null
+}
+```
+
+## Customization
+
+### Styling
+
+Edit `static/css/style.css` to customize:
+- Colors (CSS variables in `:root`)
+- Fonts
+- Layout and spacing
+- Responsive breakpoints
+
+### Templates
+
+Modify Jinja2 templates in `templates/` to change:
+- Page structure
+- Content layout
+- Form fields
+
+### AI Behavior
+
+Update `app/fitness_advisor/service.py` to adjust:
+- System prompts
+- Agent configuration
+- Response formatting
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Module Not Found Error**
+   - Ensure virtual environment is activated
+   - Install all dependencies: `pip install -r requirements.txt`
+
+2. **Template Not Found**
+   - Verify `templates/` directory is in the project root
+   - Check file paths in controller.py
+
+3. **Static Files Not Loading**
+   - Ensure `static/` directory exists
+   - Verify static mount in main.py
+
+4. **API Key Error**
+   - Set CEREBRAS_API_KEY environment variable
+   - Verify API key is valid
+
+## Features to Add
+
+- [ ] User authentication and saved plans
+- [ ] Progress tracking over time
+- [ ] PDF export of fitness plans
+- [ ] Email delivery of plans
+- [ ] Integration with fitness trackers
+- [ ] Multiple language support
+
+---

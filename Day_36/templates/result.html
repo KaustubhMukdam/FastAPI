@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Your Fitness Plan - Fitness Advisor{% endblock %}
+
+{% block content %}
+<div class="result-page">
+    <div class="container">
+        <div class="result-header">
+            <h1>Your Personalized Fitness Plan</h1>
+            <div class="result-actions">
+                <button onclick="window.print()" class="btn btn-secondary">Print Plan</button>
+                <a href="/form" class="btn btn-outline">Create New Plan</a>
+            </div>
+        </div>
+
+        <div id="resultContent" class="result-content">
+            <!-- Content will be loaded by JavaScript -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    const resultData = sessionStorage.getItem('fitnessResult');
+    
+    if (!resultData) {
+        window.location.href = '/form';
+        return;
+    }
+    
+    const data = JSON.parse(resultData);
+    const resultContent = document.getElementById('resultContent');
+    
+    // Convert markdown-like content to HTML
+    const resultText = data.result || data.message;
+    
+    if (typeof resultText === 'string') {
+        // Simple markdown to HTML conversion
+        let html = resultText
+            .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+            .replace(/^- (.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/^(.+)$/gm, '<p>$1</p>')
+            .replace(/<p><h/g, '<h')
+            .replace(/<\/h([1-6])><\/p>/g, '</h$1>')
+            .replace(/<p><ul>/g, '<ul>')
+            .replace(/<\/ul><\/p>/g, '</ul>')
+            .replace(/<p><\/p>/g, '');
+        
+        resultContent.innerHTML = `<div class="markdown-content">${html}</div>`;
+    } else {
+        // If it's an object with structured data
+        displayStructuredResult(data.result);
+    }
+});
+
+function displayStructuredResult(result) {
+    const resultContent = document.getElementById('resultContent');
+    
+    let html = '<div class="structured-result">';
+    
+    // Daily Calories
+    if (result.daily_calories) {
+        html += `
+            <div class="result-card">
+                <h2>📊 Daily Calorie Target</h2>
+                <div class="calorie-badge">${result.daily_calories} kcal/day</div>
+            </div>
+        `;
+    }
+    
+    // Macros
+    if (result.macros) {
+        html += `
+            <div class="result-card">
+                <h2>🥑 Macronutrient Distribution</h2>
+                <div class="macros-grid">
+        `;
+        for (const [key, value] of Object.entries(result.macros)) {
+            html += `<div class="macro-item"><strong>${key}:</strong> ${value}</div>`;
+        }
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    // Workout Plan
+    if (result.workout_plan && result.workout_plan.length > 0) {
+        html += `
+            <div class="result-card">
+                <h2>💪 Workout Plan</h2>
+                <div class="workout-list">
+        `;
+        result.workout_plan.forEach(exercise => {
+            html += `
+                <div class="workout-item">
+                    <h3>${exercise.name}</h3>
+                    <div class="workout-details">
+                        <span>Sets: ${exercise.sets}</span>
+                        <span>Reps: ${exercise.reps}</span>
+                        <span>Rest: ${exercise.rest_time}s</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    // Meal Plan
+    if (result.meal_plan && result.meal_plan.length > 0) {
+        html += `
+            <div class="result-card">
+                <h2>🍽️ Meal Plan</h2>
+                <div class="meal-list">
+        `;
+        result.meal_plan.forEach(meal => {
+            html += `
+                <div class="meal-item">
+                    <h3>${meal.name}</h3>
+                    <div class="meal-timing">${meal.timing}</div>
+                    <div class="meal-macros">
+                        <span>Calories: ${meal.calories}</span>
+                        <span>Protein: ${meal.protein}g</span>
+                        <span>Carbs: ${meal.carbs}g</span>
+                        <span>Fats: ${meal.fats}g</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    // Tips
+    if (result.tips && result.tips.length > 0) {
+        html += `
+            <div class="result-card">
+                <h2>💡 Tips & Recommendations</h2>
+                <ul class="tips-list">
+        `;
+        result.tips.forEach(tip => {
+            html += `<li>${tip}</li>`;
+        });
+        html += `
+                </ul>
+            </div>
+        `;
+    }
+    
+    // Weekly Schedule
+    if (result.weekly_schedule) {
+        html += `
+            <div class="result-card">
+                <h2>📅 Weekly Schedule</h2>
+                <div class="schedule-grid">
+        `;
+        for (const [day, activities] of Object.entries(result.weekly_schedule)) {
+            html += `
+                <div class="schedule-day">
+                    <h3>${day}</h3>
+                    <p>${activities}</p>
+                </div>
+            `;
+        }
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    // Motivational Quotes
+    if (result.motivational_quotes && result.motivational_quotes.length > 0) {
+        html += `
+            <div class="result-card quotes-card">
+                <h2>✨ Motivational Quotes</h2>
+                <div class="quotes-list">
+        `;
+        result.motivational_quotes.forEach(quote => {
+            html += `<blockquote>${quote}</blockquote>`;
+        });
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    resultContent.innerHTML = html;
+}
+</script>
+{% endblock %}
