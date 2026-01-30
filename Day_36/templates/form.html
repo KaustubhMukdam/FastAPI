@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Get Your Plan - Fitness Advisor{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="container">
+        <div class="form-header">
+            <h1>Create Your Personalized Fitness Plan</h1>
+            <p>Fill in your details below to get started</p>
+        </div>
+
+        <form id="fitnessForm" class="fitness-form">
+            <div class="form-section">
+                <h2>Personal Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="age">Age *</label>
+                        <input type="number" id="age" name="age" min="13" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender *</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select...</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="weight">Weight (kg) *</label>
+                        <input type="number" id="weight" name="weight" min="30" max="300" step="0.1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (cm) *</label>
+                        <input type="number" id="height" name="height" min="100" max="250" step="0.1" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Fitness Goals & Activity</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="activity_level">Activity Level *</label>
+                        <select id="activity_level" name="activity_level" required>
+                            <option value="">Select...</option>
+                            <option value="sedentary">Sedentary (little or no exercise)</option>
+                            <option value="light">Light (exercise 1-3 days/week)</option>
+                            <option value="moderate">Moderate (exercise 3-5 days/week)</option>
+                            <option value="very_active">Very Active (exercise 6-7 days/week)</option>
+                            <option value="athlete">Athlete (training twice per day)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fitness_goal">Fitness Goal *</label>
+                        <select id="fitness_goal" name="fitness_goal" required>
+                            <option value="">Select...</option>
+                            <option value="weight_loss">Weight Loss</option>
+                            <option value="muscle_gain">Muscle Gain</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="endurance">Endurance</option>
+                            <option value="strength">Strength</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="workout_days_per_week">Workout Days Per Week *</label>
+                        <input type="number" id="workout_days_per_week" name="workout_days_per_week" min="1" max="7" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="preferred_workout_time">Preferred Workout Time</label>
+                        <select id="preferred_workout_time" name="preferred_workout_time">
+                            <option value="">Select...</option>
+                            <option value="Morning">Morning</option>
+                            <option value="Afternoon">Afternoon</option>
+                            <option value="Evening">Evening</option>
+                            <option value="Night">Night</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h2>Additional Details</h2>
+                <div class="form-group full-width">
+                    <label for="available_equipment">Available Equipment (comma-separated)</label>
+                    <input type="text" id="available_equipment" name="available_equipment" placeholder="e.g., Dumbbells, Treadmill, Resistance Bands">
+                    <small>Leave blank if you have no equipment</small>
+                </div>
+                <div class="form-group full-width">
+                    <label for="dietary_restrictions">Dietary Restrictions (comma-separated)</label>
+                    <input type="text" id="dietary_restrictions" name="dietary_restrictions" placeholder="e.g., Vegetarian, Gluten-free, Lactose intolerant">
+                    <small>Leave blank if you have no restrictions</small>
+                </div>
+                <div class="form-group full-width">
+                    <label for="injuries">Injuries or Limitations (comma-separated)</label>
+                    <input type="text" id="injuries" name="injuries" placeholder="e.g., Knee pain, Lower back injury">
+                    <small>Leave blank if you have no injuries</small>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">Generate My Plan</button>
+            </div>
+        </form>
+
+        <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+            <div class="spinner"></div>
+            <p>Creating your personalized fitness plan...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('fitnessForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    const spinner = document.getElementById('loadingSpinner');
+    
+    // Parse form data
+    const data = {
+        age: parseInt(formData.get('age')),
+        weight: parseFloat(formData.get('weight')),
+        height: parseFloat(formData.get('height')),
+        gender: formData.get('gender'),
+        activity_level: formData.get('activity_level'),
+        fitness_goal: formData.get('fitness_goal'),
+        workout_days_per_week: parseInt(formData.get('workout_days_per_week')),
+        preferred_workout_time: formData.get('preferred_workout_time') || null,
+        available_equipment: formData.get('available_equipment') 
+            ? formData.get('available_equipment').split(',').map(item => item.trim())
+            : null,
+        dietary_restrictions: formData.get('dietary_restrictions')
+            ? formData.get('dietary_restrictions').split(',').map(item => item.trim())
+            : null,
+        injuries: formData.get('injuries')
+            ? formData.get('injuries').split(',').map(item => item.trim())
+            : null
+    };
+    
+    // Show spinner, hide form
+    form.style.display = 'none';
+    spinner.style.display = 'block';
+    
+    try {
+        const response = await fetch('/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to generate plan');
+        }
+        
+        const result = await response.json();
+        
+        // Store result in sessionStorage and redirect
+        sessionStorage.setItem('fitnessResult', JSON.stringify(result));
+        window.location.href = '/result';
+        
+    } catch (error) {
+        alert('An error occurred: ' + error.message);
+        form.style.display = 'block';
+        spinner.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}
