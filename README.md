@@ -4453,7 +4453,7 @@ This project showcases how to build modern, AI-powered web applications using Fa
 ---
 # Day-36
 
-# Fitness Advisor - AI-Powered Fitness & Nutrition Planner
+# Fitness Advisor - AI-Powered Fitness & Nutrition Planner (Folder: Day_36)
 
 A modern web application built with FastAPI and Jinja2 that generates personalized fitness and nutrition plans using AI.
 
