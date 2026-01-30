@@ -3899,4 +3899,557 @@ For this we have taken 2 things: Todo and User (with proper authentication)
 ---
 # Day-35
 
-## Financial Advisor AI Agent using FastAPI and Groq (Folder: Day_35)
+## AI-Powered Financial Advisor with FastAPI, Pydantic-AI, and Real-Time Analysis (Folder: Day_35)
+
+This application demonstrates building an intelligent financial advisor system using FastAPI, Pydantic-AI, and Cerebras LLM. It showcases modern web development practices including AI-powered analysis, structured data validation, responsive web interfaces, and real-time financial insights. The system analyzes user financial profiles and provides personalized advice, risk assessments, and actionable recommendations.
+
+### Learning Goals:
+1. Integrate AI/LLM capabilities into FastAPI applications using Pydantic-AI
+2. Build interactive web forms with dynamic field management
+3. Implement structured AI outputs with Pydantic model validation
+4. Create responsive, modern web interfaces with Jinja2 templates
+5. Handle complex financial calculations and risk assessments
+6. Work with AI agents for domain-specific analysis
+7. Implement proper error handling for AI responses
+8. Design user-friendly financial analysis tools
+
+### What is Pydantic-AI?
+
+- **AI Integration Framework**: Simplifies working with Large Language Models in Python
+- **Structured Outputs**: Ensures AI responses match Pydantic schemas
+- **Type Safety**: Leverages Python's type system for AI interactions
+- **Agent Pattern**: Organizes AI logic with dependencies and system prompts
+- **Model Agnostic**: Works with various LLM providers (OpenAI, Anthropic, Cerebras, etc.)
+- **Validation**: Automatic validation of AI-generated responses
+
+### Key Features Demonstrated:
+
+#### AI-Powered Analysis:
+- **Financial Advisor Agent**: AI-powered financial profile analysis
+- **Structured Outputs**: Guaranteed JSON structure from LLM responses
+- **Context Injection**: Dynamic system prompts with user data
+- **Risk Assessment**: AI-calculated risk scores (1-10 scale)
+- **Debt-to-Income Ratio**: Automated financial metric calculations
+- **Personalized Advice**: Context-aware financial recommendations
+
+#### Frontend Features:
+- **Dynamic Forms**: Add/remove income sources, expenses, and debts
+- **Real-Time Validation**: Client-side form validation before submission
+- **Loading States**: Visual feedback during AI analysis
+- **Responsive Design**: Mobile-friendly interface with modern UI
+- **Risk Visualization**: Color-coded risk indicator with gradient bar
+- **Smooth Animations**: Professional transitions and visual effects
+
+#### Financial Analysis:
+- **Income Tracking**: Multiple income sources with frequencies
+- **Expense Management**: Essential vs. non-essential expense categorization
+- **Debt Analysis**: Interest rates, minimum payments, and debt prioritization
+- **Savings Assessment**: Emergency fund and retirement savings evaluation
+- **Credit Score Integration**: Credit score consideration in risk analysis
+- **Comprehensive Reports**: Detailed financial advice and action items
+
+### Installation:
+
+**Install dependencies:**
+```bash
+pip install -r requirements.txt
+```
+
+Or using UV:
+```bash
+uv add fastapi uvicorn pydantic-ai python-dotenv jinja2 python-multipart
+```
+
+### Environment Setup:
+
+Create a `.env` file in the Day_35 directory:
+```env
+CEREBRAS_API_KEY=your_cerebras_api_key_here
+```
+
+**Get your free Cerebras API key**: Sign up at [cerebras.ai](https://cerebras.ai) for fast, free LLM inference.
+
+### Project Structure:
+```
+Day_35/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                      # FastAPI application entry point
+│   └── finance_advisor/
+│       ├── __init__.py
+│       ├── controller.py            # API routes and template rendering
+│       ├── model.py                 # Pydantic models for financial data
+│       └── service.py               # AI agent and business logic
+├── templates/
+│   └── index.html                   # Main web interface
+├── static/
+│   ├── css/
+│   │   └── style.css               # Modern styling with gradients
+│   └── js/
+│       └── script.js               # Dynamic form handling and API calls
+├── .env                             # Environment variables
+├── .env.example                     # Environment template
+├── requirements.txt                 # Python dependencies
+└── README.md                        # This file
+```
+
+### Data Models:
+
+#### Income Model:
+```python
+class Income(BaseModel):
+    source: str                      # Source of income (e.g., "Salary")
+    amount: float                    # Amount in dollars
+    frequency: str                   # "monthly", "bi-weekly", or "yearly"
+```
+
+#### Expense Model:
+```python
+class Expense(BaseModel):
+    category: str                    # Expense category (e.g., "Rent")
+    amount: float                    # Amount in dollars
+    frequency: str                   # "monthly", "bi-weekly", or "yearly"
+    essential: bool                  # True for essential expenses
+```
+
+#### Debt Model:
+```python
+class Debt(BaseModel):
+    type: str                        # Type of debt (e.g., "Credit Card")
+    amount: float                    # Total debt amount
+    interest_rate: float             # Annual interest rate (%)
+    minimum_payment: float           # Monthly minimum payment
+```
+
+#### Financial Profile:
+```python
+class FinancialProfile(BaseModel):
+    monthly_income: List[Income]
+    monthly_expenses: List[Expense]
+    debts: List[Debt]
+    savings: float
+    emergency_fund: Optional[float] = 0
+    retirement_savings: Optional[float] = 0
+    credit_score: Optional[int] = None
+```
+
+#### Financial Report Result:
+```python
+class FinancialReportResult(BaseModel):
+    financial_advice: str            # Personalized financial advice
+    debt_to_income_ratio: str        # DTI ratio as percentage
+    risk: int                        # Risk score from 1 (low) to 10 (high)
+    decrease_risk: str               # Suggestions to reduce risk
+```
+
+### Running the Application:
+
+**Using Python:**
+```bash
+cd Day_35
+uvicorn app.main:app --reload
+```
+
+**Using UV:**
+```bash
+cd Day_35
+uv run fastapi dev app/main.py
+```
+
+**Or set environment variable manually (Windows PowerShell):**
+```powershell
+$env:CEREBRAS_API_KEY="your-api-key-here"
+uvicorn app.main:app --reload
+```
+
+Application runs on: `http://127.0.0.1:8000`
+
+### API Endpoints:
+
+#### GET Endpoints:
+- `GET /`: Homepage with financial profile form
+
+#### POST Endpoints:
+- `POST /analyze`: Analyze financial profile and return AI-generated advice
+
+**Request Body Example:**
+```json
+{
+  "monthly_income": [
+    {
+      "source": "Salary",
+      "amount": 5000,
+      "frequency": "monthly"
+    },
+    {
+      "source": "Freelance",
+      "amount": 1200,
+      "frequency": "monthly"
+    }
+  ],
+  "monthly_expenses": [
+    {
+      "category": "Rent",
+      "amount": 1500,
+      "frequency": "monthly",
+      "essential": true
+    },
+    {
+      "category": "Groceries",
+      "amount": 600,
+      "frequency": "monthly",
+      "essential": true
+    },
+    {
+      "category": "Entertainment",
+      "amount": 300,
+      "frequency": "monthly",
+      "essential": false
+    }
+  ],
+  "debts": [
+    {
+      "type": "Credit Card",
+      "amount": 8000,
+      "interest_rate": 18.5,
+      "minimum_payment": 200
+    },
+    {
+      "type": "Student Loan",
+      "amount": 25000,
+      "interest_rate": 5.5,
+      "minimum_payment": 250
+    }
+  ],
+  "savings": 10000,
+  "emergency_fund": 5000,
+  "retirement_savings": 15000,
+  "credit_score": 720
+}
+```
+
+**Response Example:**
+```json
+{
+  "financial_advice": "Your financial profile shows a solid foundation with good income and reasonable debt levels. However, there are opportunities for improvement...",
+  "debt_to_income_ratio": "10.8%",
+  "risk": 4,
+  "decrease_risk": "Consider increasing your emergency fund to cover 6 months of expenses. Focus on paying down the high-interest credit card debt first..."
+}
+```
+
+### Key Implementation Details:
+
+#### AI Agent Configuration:
+```python
+from pydantic_ai import Agent, RunContext
+from app.finance_advisor.model import FinancialProfile, FinancialReportResult
+
+financial_agent = Agent(
+    'cerebras:gpt-oss-120b',
+    deps_type=FinancialProfile,
+    system_prompt=(
+        "You are a financial advisor AI. Analyze the user's financial profile "
+        "and provide advice. You MUST respond ONLY with valid JSON..."
+    )
+)
+```
+
+#### Dynamic System Prompt:
+```python
+@financial_agent.system_prompt
+async def add_user_finance(ctx: RunContext[FinancialProfile]) -> str:
+    """Inject user's financial data into the system prompt."""
+    finance_data = ctx.deps
+    
+    total_monthly_income = sum(inc.amount for inc in finance_data.monthly_income)
+    total_monthly_expenses = sum(exp.amount for exp in finance_data.monthly_expenses)
+    
+    return f"""
+FINANCIAL PROFILE DATA:
+Monthly Income (Total: ${total_monthly_income:,.2f}):
+  • {income_details}
+...
+    """
+```
+
+#### Response Parsing with Error Handling:
+```python
+async def analyze_profile(financial_profile: FinancialProfile) -> FinancialReportResult:
+    result = await financial_agent.run(
+        "Analyze the financial profile and respond with the required JSON.",
+        deps=financial_profile
+    )
+    
+    response_data = result.data
+    
+    if isinstance(response_data, str):
+        # Parse JSON response
+        cleaned = response_data.strip()
+        data = json.loads(cleaned)
+        return FinancialReportResult(**data)
+    
+    return FinancialReportResult(**response_data)
+```
+
+### Frontend Implementation:
+
+#### Dynamic Form Fields:
+```javascript
+function addIncome() {
+    const incomeList = document.getElementById('incomeList');
+    const newIncome = document.createElement('div');
+    newIncome.className = 'income-item dynamic-item';
+    newIncome.innerHTML = `
+        <input type="text" name="income_source[]" placeholder="Source" required>
+        <input type="number" name="income_amount[]" placeholder="Amount" required>
+        <select name="income_frequency[]" required>
+            <option value="monthly">Monthly</option>
+            <option value="bi-weekly">Bi-Weekly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+        <button type="button" class="btn-remove" onclick="removeItem(this)">✕</button>
+    `;
+    incomeList.appendChild(newIncome);
+}
+```
+
+#### Form Submission and API Call:
+```javascript
+document.getElementById('financialForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const financialProfile = buildFinancialProfile();
+    
+    // Show loading state
+    showLoading();
+    
+    try {
+        const response = await fetch('/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(financialProfile)
+        });
+        
+        const result = await response.json();
+        displayResults(result);
+    } catch (error) {
+        showError(error.message);
+    }
+});
+```
+
+#### Risk Visualization:
+```javascript
+function displayResults(result) {
+    // Update risk indicator position on gradient bar
+    const riskIndicator = document.getElementById('risk_indicator');
+    const riskPosition = (result.risk / 10) * 100;
+    riskIndicator.style.left = `${riskPosition}%`;
+    
+    // Color-code risk score
+    const riskScoreElement = document.getElementById('risk_score');
+    if (result.risk <= 3) {
+        riskScoreElement.style.color = '#059669'; // Green - Low risk
+    } else if (result.risk <= 6) {
+        riskScoreElement.style.color = '#d97706'; // Orange - Medium risk
+    } else {
+        riskScoreElement.style.color = '#dc2626'; // Red - High risk
+    }
+}
+```
+
+### UI Features:
+
+#### Modern Design:
+- **Gradient Background**: Purple-to-violet gradient for visual appeal
+- **Card-Based Layout**: Clean, organized sections with shadows
+- **Responsive Grid**: Adapts to all screen sizes (mobile to desktop)
+- **Color-Coded Indicators**: Visual risk assessment with gradient bar
+- **Smooth Transitions**: Professional animations throughout
+
+#### Interactive Elements:
+- **Dynamic Fields**: Add/remove items with smooth animations
+- **Form Validation**: Real-time input validation
+- **Loading Spinner**: Visual feedback during AI processing
+- **Results Display**: Organized, easy-to-read analysis
+- **Reset Functionality**: Clear form and restart analysis
+
+#### Accessibility:
+- **Semantic HTML**: Proper heading hierarchy and structure
+- **Form Labels**: Clear labels for all input fields
+- **Error Messages**: User-friendly error handling
+- **Keyboard Navigation**: Full keyboard accessibility
+- **Responsive Design**: Works on all devices and screen sizes
+
+### Financial Metrics Calculated:
+
+#### Debt-to-Income Ratio:
+```
+DTI = (Total Monthly Debt Payments / Total Monthly Income) × 100
+```
+
+#### Risk Assessment Factors:
+1. **Debt Load**: Total debt vs. income ratio
+2. **Savings Adequacy**: Emergency fund coverage (3-6 months recommended)
+3. **Expense Ratio**: Essential vs. non-essential expenses
+4. **Interest Rates**: High-interest debt burden
+5. **Credit Score**: Overall creditworthiness
+6. **Income Stability**: Number and type of income sources
+
+#### Risk Score Interpretation:
+- **1-3 (Low Risk)**: Strong financial position, minimal concerns
+- **4-6 (Medium Risk)**: Room for improvement, manageable situation
+- **7-10 (High Risk)**: Significant financial challenges, action needed
+
+### Advanced Features:
+
+#### AI-Powered Analysis:
+- **Context-Aware**: Considers all financial data holistically
+- **Personalized**: Tailored advice based on individual situation
+- **Actionable**: Specific recommendations, not generic advice
+- **Prioritized**: Focuses on highest-impact improvements
+- **Educational**: Explains financial concepts and ratios
+
+#### Data Processing:
+- **Multiple Income Sources**: Handles various income types and frequencies
+- **Expense Categorization**: Distinguishes essential vs. discretionary
+- **Debt Prioritization**: Considers interest rates and balances
+- **Savings Analysis**: Evaluates emergency and retirement funds
+- **Credit Integration**: Factors in credit score when available
+
+### Security Considerations:
+
+1. **Input Validation**: Pydantic models prevent malicious input
+2. **Environment Variables**: Secure API key storage
+3. **No Data Persistence**: Financial data not stored on server
+4. **Client-Side Validation**: Input sanitization before API calls
+5. **HTTPS Ready**: Prepared for SSL/TLS in production
+6. **No Logging of Sensitive Data**: Financial info not logged
+
+### Performance Optimizations:
+
+1. **Fast LLM Provider**: Cerebras offers high-speed inference
+2. **Async Operations**: Non-blocking AI agent calls
+3. **Minimal Dependencies**: Lightweight application stack
+4. **Efficient Parsing**: Optimized JSON response handling
+5. **Client-Side Processing**: Form data built on client before API call
+6. **Lazy Loading**: Resources loaded as needed
+
+### Production Considerations:
+
+1. **Authentication**: Add user authentication for multi-user support
+2. **Data Persistence**: Store profiles for historical analysis
+3. **Rate Limiting**: Protect API from abuse
+4. **Caching**: Cache AI responses for identical profiles
+5. **Monitoring**: Track API usage and errors
+6. **Backup LLM**: Fallback provider if Cerebras unavailable
+7. **Analytics**: Track user engagement and conversion
+8. **Encryption**: Encrypt sensitive financial data in transit/rest
+
+### Future Enhancements:
+
+- **Historical Tracking**: Save and compare financial snapshots over time
+- **Goal Setting**: Set financial goals and track progress
+- **Budget Planning**: AI-generated monthly budgets
+- **Investment Advice**: Portfolio recommendations based on profile
+- **Debt Payoff Calculator**: Snowball vs. avalanche strategies
+- **Tax Optimization**: Tax-saving suggestions
+- **PDF Reports**: Downloadable financial analysis reports
+- **Mobile App**: Native iOS/Android applications
+- **Financial Dashboard**: Visualizations and charts
+- **Bill Reminders**: Automated payment notifications
+- **Net Worth Tracking**: Assets minus liabilities over time
+
+### Real-World Applications:
+
+This AI financial advisor demonstrates patterns used in:
+- **Personal Finance Apps**: Mint, YNAB, Personal Capital
+- **Robo-Advisors**: Betterment, Wealthfront
+- **Banking Apps**: Chase, Bank of America financial insights
+- **Credit Score Tools**: Credit Karma, Experian
+- **Budgeting Tools**: EveryDollar, PocketGuard
+- **Financial Planning Software**: QuickBooks, FreshBooks
+- **Investment Platforms**: Robinhood, Fidelity advisory features
+
+### Best Practices Demonstrated:
+
+1. **AI Integration**: Proper use of LLMs with structured outputs
+2. **Type Safety**: Pydantic models for data validation
+3. **Error Handling**: Comprehensive exception handling
+4. **Responsive Design**: Mobile-first approach
+5. **User Experience**: Loading states and visual feedback
+6. **Code Organization**: Modular architecture with separation of concerns
+7. **Environment Management**: Secure configuration handling
+8. **Clean Code**: Readable, maintainable codebase
+
+### Troubleshooting:
+
+#### Common Issues:
+
+**1. API Key Not Found**
+```
+Error: Set the `CEREBRAS_API_KEY` environment variable
+```
+**Solution**: Ensure `.env` file exists with correct API key, or set manually:
+```powershell
+$env:CEREBRAS_API_KEY="your-key-here"  # Windows
+export CEREBRAS_API_KEY="your-key-here"  # Linux/Mac
+```
+
+**2. Template Not Found**
+```
+Error: TemplateNotFound: index.html
+```
+**Solution**: Verify `templates/` directory exists in project root with `index.html`
+
+**3. Static Files Not Loading**
+```
+Error: 404 on /static/css/style.css
+```
+**Solution**: Ensure `static/css/` and `static/js/` directories exist with files
+
+**4. AI Response Parsing Error**
+```
+Error: JSONDecodeError
+```
+**Solution**: The AI occasionally returns non-JSON. The code handles this with fallback responses.
+
+### Technologies Used:
+
+- **Backend**: FastAPI (Web framework)
+- **AI Framework**: Pydantic-AI (LLM integration)
+- **LLM Provider**: Cerebras (Fast, free inference)
+- **Templating**: Jinja2 (Server-side rendering)
+- **Validation**: Pydantic (Data validation)
+- **Frontend**: Vanilla JavaScript (No framework overhead)
+- **Styling**: Custom CSS3 (Modern, responsive)
+
+### Learning Outcomes:
+
+By completing this project, you will understand:
+- How to integrate AI/LLMs into web applications
+- Structured output generation with AI
+- Building responsive financial applications
+- Dynamic form handling and validation
+- AI agent patterns with dependencies
+- Modern web UI development
+- FastAPI best practices
+- Real-world financial calculations
+
+### Notes:
+
+- **Free AI Inference**: Cerebras provides fast, free LLM access
+- **No Database**: Financial data is not persisted (privacy-focused)
+- **Instant Analysis**: Real-time AI-powered financial insights
+- **Modular Design**: Easy to extend with additional features
+- **Production-Ready**: Foundation for a commercial application
+- **Educational**: Demonstrates modern AI integration patterns
+- **Scalable**: Can handle multiple concurrent analyses
+- **Privacy-Focused**: No data storage or logging of sensitive info
+
+This project showcases how to build modern, AI-powered web applications using FastAPI and Pydantic-AI, providing a solid foundation for financial technology applications, personal finance tools, and any system requiring intelligent analysis of structured data.
+
+---
+
+**Happy Coding! 🚀💰**
